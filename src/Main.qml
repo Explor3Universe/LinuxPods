@@ -39,15 +39,17 @@ ApplicationWindow {
     property bool _hadFocus: false
     property bool _autoHide: Qt.application.arguments.indexOf("--no-autohide") === -1
     property int _targetY: 40
-    property real _slideOffset: 0   // animated offset, 0 = parked
+    property real _slideOffset: 0   // 0 = parked at _targetY, >0 = above
 
-    // Animated slide-down: window y = _targetY - _slideOffset.
-    // _slideOffset starts at +height (above the screen) and animates to 0.
+    // Animated slide-down. Start with the popup parked ~120 px above its
+    // final position with opacity 0; the OutCubic animation slides it
+    // into place over ~450 ms — enough to feel like it's dropping out
+    // of the top system panel.
     y: _targetY - _slideOffset
-    opacity: _slideOffset === 0 ? 1.0 : Math.max(0.0, 1.0 - _slideOffset / 60)
+    opacity: _slideOffset === 0 ? 1.0 : Math.max(0.0, 1.0 - _slideOffset / 120)
 
     Behavior on _slideOffset {
-        NumberAnimation { duration: 260; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: 450; easing.type: Easing.OutCubic }
     }
 
     function showFromTopPanel() {
@@ -56,8 +58,7 @@ ApplicationWindow {
             mainWindow.x = screen.virtualX + screen.width - mainWindow.width - 16;
             mainWindow._targetY = screen.virtualY + 40;
         }
-        // Park above the screen first, then animate down
-        mainWindow._slideOffset = mainWindow.height + 60;
+        mainWindow._slideOffset = 120;   // park above
         mainWindow.visible = true;
         Qt.callLater(() => {
             mainWindow.raise();
@@ -70,20 +71,18 @@ ApplicationWindow {
         showFromTopPanel();
     }
 
-    // Auto-hide when the popup loses focus (skipped with --no-autohide).
     onActiveChanged: {
         if (active) {
             _hadFocus = true;
         } else if (_autoHide && _hadFocus && visible) {
-            // Animate out, then hide.
-            mainWindow._slideOffset = mainWindow.height + 60;
+            mainWindow._slideOffset = 120;   // animate out
             hideTimer.start();
         }
     }
 
     Timer {
         id: hideTimer
-        interval: 300
+        interval: 480
         onTriggered: mainWindow.visible = false
     }
 
