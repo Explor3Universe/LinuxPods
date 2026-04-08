@@ -20,7 +20,11 @@ import QtQuick.Effects
 // methods) is preserved unchanged — this is purely a visual rewrite.
 ApplicationWindow {
     id: mainWindow
-    visible: !airPodsTrayApp.hideOnStart
+    // Always hidden by default — the window is a tray dropdown popup,
+    // not a regular window. It appears with a slide-down animation only
+    // when the user clicks the tray icon (or when reopen() is invoked
+    // from C++).
+    visible: false
     width: 360
     height: 540
     minimumWidth: 340
@@ -38,52 +42,55 @@ ApplicationWindow {
 
     property bool _hadFocus: false
     property bool _autoHide: Qt.application.arguments.indexOf("--no-autohide") === -1
+    // Show on startup only when explicitly told via --no-autohide or
+    // a sub-page deeplink. The default daemon mode (--hide) keeps the
+    // popup invisible until C++ reopen() is invoked.
+    property bool _initialAutoShow: Qt.application.arguments.indexOf("--no-autohide") !== -1
+                                    || Qt.application.arguments.indexOf("--settings") !== -1
+                                    || Qt.application.arguments.indexOf("--hearing") !== -1
+    // Brief grace period after the popup appears, during which losing focus
+    // will NOT trigger auto-hide (avoids the popup vanishing the instant
+    // the spawning bash / spectacle process steals focus).
+    property bool _autoHideArmed: false
 
-    // Slide-down: animate y from (target - 80) to target. Plain visible window,
-    // no opacity tricks (which were leaving the popup invisible at startup).
-    Behavior on y {
-        NumberAnimation { duration: 380; easing.type: Easing.OutCubic }
+
+    // Show the popup. We do NOT try to set x/y manually — Wayland
+    // compositors (KWin) ignore client-side positioning for normal
+    // top-level windows. Instead we let KStatusNotifierItem +
+    // KWin handle placement; on KDE Plasma 6 this anchors the window
+    // to the tray icon automatically because we registered it via
+    // setAssociatedWindow() in C++.
+    function showFromTopPanel(anchorX, anchorY) {
+        mainWindow.visible = true;
+        mainWindow.raise();
+        mainWindow.requestActivate();
+    }
+
+    function hideToTopPanel() {
+        mainWindow.visible = false;
+    }
+
+    Timer {
+        id: armAutoHideTimer
+        interval: 800
+        onTriggered: mainWindow._autoHideArmed = true
     }
 
     Component.onCompleted: {
-        const screen = Qt.application.primaryScreen || Qt.application.screens[0];
-        const targetX = screen ? screen.virtualX + screen.width - mainWindow.width - 16 : 100;
-        const targetY = screen ? screen.virtualY + 40 : 40;
-
-        // Place above the screen first so the Behavior animates down on next frame.
-        mainWindow.x = targetX;
-        mainWindow.y = targetY - 80;
-        mainWindow.visible = true;
-
-        slideTimer.targetY = targetY;
-        slideTimer.start();
-    }
-
-    Timer {
-        id: slideTimer
-        interval: 30
-        property int targetY: 40
-        onTriggered: {
-            mainWindow.y = targetY;
-            mainWindow.raise();
-            mainWindow.requestActivate();
+        if (_initialAutoShow) {
+            showFromTopPanel(-1, -1);
         }
     }
 
+    // When the popup loses focus, slide it back up and hide.
     onActiveChanged: {
         if (active) {
             _hadFocus = true;
-        } else if (_autoHide && _hadFocus && visible) {
-            // Slide out and then hide.
-            mainWindow.y = mainWindow.y - 80;
-            hideTimer.start();
+        } else if (_autoHide && _autoHideArmed && _hadFocus && visible) {
+            hideToTopPanel();
+            _hadFocus = false;
+            _autoHideArmed = false;
         }
-    }
-
-    Timer {
-        id: hideTimer
-        interval: 420
-        onTriggered: mainWindow.visible = false
     }
 
     // ── Stitch dark gradient background ───────────────────────────────
@@ -97,7 +104,15 @@ ApplicationWindow {
 
     onClosing: mainWindow.visible = false
 
-    function reopen(pageToLoad) {
+    // Called from C++ when the user clicks the tray icon.
+    // anchorX/anchorY are the global screen coordinates of the click on the
+    // tray icon (KStatusNotifierItem::activateRequested gives us this on
+    // Wayland — the geometry that QSystemTrayIcon::geometry() can't return).
+    // Pass -1, -1 to use the default top-right placement.
+    function reopen(pageToLoad, anchorX, anchorY) {
+        console.error("[LinuxPods] reopen pageToLoad=" + pageToLoad
+                      + " anchor=(" + anchorX + "," + anchorY + ")"
+                      + " visible=" + mainWindow.visible);
         if (pageToLoad === "settings") {
             if (stackView.depth === 1) {
                 stackView.push(settingsPage)
@@ -108,11 +123,15 @@ ApplicationWindow {
             }
         }
 
-        if (!mainWindow.visible) {
-            mainWindow.visible = true
+        if (mainWindow.visible) {
+            // Toggle behaviour: clicking the tray icon while visible hides
+            // the popup (matches KDE Quick Settings).
+            hideToTopPanel();
+            return;
         }
-        raise()
-        requestActivate()
+
+        showFromTopPanel(anchorX === undefined ? -1 : anchorX,
+                         anchorY === undefined ? -1 : anchorY);
     }
 
     MouseArea {

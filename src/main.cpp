@@ -61,7 +61,9 @@ public:
         // Initialize tray icon and connect signals
         trayManager = new TrayIconManager(this);
         trayManager->setNotificationsEnabled(loadNotificationsEnabled());
-        connect(trayManager, &TrayIconManager::trayClicked, this, &AirPodsTrayApp::onTrayIconActivated);
+        // Use the position-aware activation signal so QML can anchor the
+        // dropdown popup at the actual tray icon location on Wayland.
+        connect(trayManager, &TrayIconManager::trayClickedAt, this, &AirPodsTrayApp::onTrayIconActivatedAt);
         connect(trayManager, &TrayIconManager::openApp, this, &AirPodsTrayApp::onOpenApp);
         connect(trayManager, &TrayIconManager::openSettings, this, &AirPodsTrayApp::onOpenSettings);
         connect(trayManager, &TrayIconManager::noiseControlChanged, this, &AirPodsTrayApp::setNoiseControlMode);
@@ -442,23 +444,49 @@ public slots:
     }
 
 private slots:
+    // Position-aware tray click handler. Receives the global screen
+    // coordinate of the tray icon from KStatusNotifierItem and forwards
+    // it to the QML reopen() function so the popup can dock under it.
+    void onTrayIconActivatedAt(const QPoint &pos)
+    {
+        if (!parent || parent->rootObjects().isEmpty()) {
+            loadMainModule();
+            return;
+        }
+        QObject *rootObject = parent->rootObjects().first();
+        if (!rootObject) {
+            loadMainModule();
+            return;
+        }
+
+        // Register the QML window with the status notifier so the
+        // compositor can resolve activation tokens to the right surface.
+        if (auto qw = qobject_cast<QQuickWindow *>(rootObject)) {
+            trayManager->setAssociatedQmlWindow(qw);
+        }
+
+        QMetaObject::invokeMethod(
+            rootObject, "reopen",
+            Q_ARG(QVariant, "app"),
+            Q_ARG(QVariant, pos.x()),
+            Q_ARG(QVariant, pos.y()));
+    }
+
+    // Legacy no-position handler kept for the menu "Open" action.
     void onTrayIconActivated()
     {
-        QQuickWindow *window = qobject_cast<QQuickWindow *>(
-            QGuiApplication::topLevelWindows().constFirst());
-        if (window)
-        {
-            window->show();
-            window->raise();
-            window->requestActivate();
-        }
+        onTrayIconActivatedAt(QPoint(-1, -1));
     }
 
     void onOpenApp()
     {
         QObject *rootObject = parent->rootObjects().first();
         if (rootObject) {
-            QMetaObject::invokeMethod(rootObject, "reopen", Q_ARG(QVariant, "app"));
+            QMetaObject::invokeMethod(
+                rootObject, "reopen",
+                Q_ARG(QVariant, "app"),
+                Q_ARG(QVariant, -1),
+                Q_ARG(QVariant, -1));
         }
         else
         {
@@ -470,7 +498,11 @@ private slots:
     {
         QObject *rootObject = parent->rootObjects().first();
         if (rootObject) {
-            QMetaObject::invokeMethod(rootObject, "reopen", Q_ARG(QVariant, "settings"));
+            QMetaObject::invokeMethod(
+                rootObject, "reopen",
+                Q_ARG(QVariant, "settings"),
+                Q_ARG(QVariant, -1),
+                Q_ARG(QVariant, -1));
         }
         else
         {
@@ -950,6 +982,16 @@ public:
 
     void loadMainModule() {
         parent->load(QUrl(QStringLiteral("qrc:/linux/Main.qml")));
+        // After QML is loaded, register the root window with the
+        // KStatusNotifierItem so the compositor can route activation
+        // tokens (and on KDE Plasma, the popup positioning) correctly.
+        if (!parent->rootObjects().isEmpty()) {
+            QObject *rootObject = parent->rootObjects().first();
+            if (auto qw = qobject_cast<QQuickWindow *>(rootObject)) {
+                trayManager->setAssociatedQmlWindow(qw);
+                LOG_INFO("KStatusNotifierItem: associated window registered");
+            }
+        }
     }
 
 signals:
@@ -1082,7 +1124,11 @@ int main(int argc, char *argv[]) {
                 LOG_INFO("Reopening app window");
                 QObject *rootObject = engine.rootObjects().first();
                 if (rootObject) {
-                    QMetaObject::invokeMethod(rootObject, "reopen", Q_ARG(QVariant, "app"));
+                    QMetaObject::invokeMethod(
+                        rootObject, "reopen",
+                        Q_ARG(QVariant, "app"),
+                        Q_ARG(QVariant, -1),
+                        Q_ARG(QVariant, -1));
                 }
                 else
                 {

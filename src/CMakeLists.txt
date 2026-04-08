@@ -5,6 +5,7 @@ project(linuxpods VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Quick Widgets Bluetooth DBus LinguistTools)
+find_package(KF6StatusNotifierItem REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(PULSEAUDIO REQUIRED libpulse)
@@ -78,7 +79,9 @@ qt_add_resources(librepods "resources"
 )
 
 target_link_libraries(librepods
-    PRIVATE Qt6::Quick Qt6::Widgets Qt6::Bluetooth Qt6::DBus OpenSSL::SSL OpenSSL::Crypto ${PULSEAUDIO_LIBRARIES}
+    PRIVATE Qt6::Quick Qt6::Widgets Qt6::Bluetooth Qt6::DBus
+            KF6::StatusNotifierItem
+            OpenSSL::SSL OpenSSL::Crypto ${PULSEAUDIO_LIBRARIES}
 )
 
 qt_add_executable(librepods-ctl

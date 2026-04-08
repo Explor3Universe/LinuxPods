@@ -14,6 +14,7 @@ BuildRequires:  qt6-qtconnectivity-devel
 BuildRequires:  qt6-qtmultimedia-devel
 BuildRequires:  qt6-qtdeclarative-devel
 BuildRequires:  qt6-qttools-devel
+BuildRequires:  kf6-kstatusnotifieritem-devel
 BuildRequires:  openssl-devel
 BuildRequires:  pulseaudio-libs-devel
 BuildRequires:  pkgconfig
@@ -22,6 +23,7 @@ Requires:       qt6-qtbase
 Requires:       qt6-qtconnectivity
 Requires:       qt6-qtmultimedia
 Requires:       qt6-qtdeclarative
+Requires:       kf6-kstatusnotifieritem
 Requires:       openssl-libs
 Requires:       pulseaudio-libs
 Requires:       bluez
