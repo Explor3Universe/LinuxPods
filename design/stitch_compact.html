@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "surface-container-highest": "#262626",
+                  "secondary-fixed-dim": "#60eaa2",
+                  "on-error": "#490006",
+                  "surface-dim": "#0e0e0e",
+                  "on-secondary-fixed-variant": "#00673f",
+                  "on-tertiary-fixed-variant": "#5f1876",
+                  "error-dim": "#d7383b",
+                  "tertiary": "#eda8ff",
+                  "surface-container-lowest": "#000000",
+                  "primary-fixed-dim": "#4a94f5",
+                  "secondary-container": "#006d42",
+                  "surface-tint": "#7bafff",
+                  "on-background": "#ffffff",
+                  "surface-container-high": "#1f2020",
+                  "secondary-fixed": "#70f9af",
+                  "surface-container": "#191a1a",
+                  "surface-variant": "#262626",
+                  "on-error-container": "#ffa8a3",
+                  "background": "#0e0e0e",
+                  "on-surface-variant": "#adabaa",
+                  "error": "#ff716c",
+                  "surface": "#0e0e0e",
+                  "on-secondary-fixed": "#00472a",
+                  "on-tertiary": "#601a77",
+                  "secondary": "#70f9af",
+                  "tertiary-dim": "#d589eb",
+                  "on-secondary-container": "#e2ffe9",
+                  "primary-dim": "#589fff",
+                  "inverse-primary": "#005fb3",
+                  "secondary-dim": "#60eaa2",
+                  "on-secondary": "#005c37",
+                  "tertiary-fixed-dim": "#d589eb",
+                  "primary": "#7bafff",
+                  "on-tertiary-container": "#550b6d",
+                  "outline": "#767575",
+                  "on-primary-container": "#002348",
+                  "inverse-on-surface": "#565555",
+                  "inverse-surface": "#fcf9f8",
+                  "tertiary-fixed": "#e496f9",
+                  "outline-variant": "#484848",
+                  "on-primary-fixed-variant": "#002c59",
+                  "on-primary": "#002e5d",
+                  "primary-container": "#5ea2ff",
+                  "primary-fixed": "#5ea2ff",
+                  "error-container": "#9f0519",
+                  "surface-bright": "#2c2c2c",
+                  "tertiary-container": "#e496f9",
+                  "on-primary-fixed": "#000000",
+                  "surface-container-low": "#131313",
+                  "on-surface": "#ffffff",
+                  "on-tertiary-fixed": "#320043"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.25rem",
+                  "lg": "0.5rem",
+                  "xl": "0.75rem",
+                  "2xl": "1rem",
+                  "full": "9999px"
+          },
+          "fontFamily": {
+                  "headline": ["Inter"],
+                  "body": ["Inter"],
+                  "label": ["Inter"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .glass-card { background: rgba(30, 30, 30, 0.55); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+    .primary-glow { box-shadow: 0 0 60px 10px rgba(123, 175, 255, 0.15); }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  </style>
+</head>
+<body class="bg-transparent antialiased flex items-center justify-center min-h-screen">
+<!-- Desktop Tray Panel Wrapper -->
+<div class="w-[360px] h-[520px] bg-background border border-outline-variant/20 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+<!-- Title Strip (44px) -->
+<header class="h-11 flex items-center justify-between px-4 border-b border-white/5 bg-neutral-950/80 backdrop-blur-xl">
+<h1 class="text-[13px] font-semibold text-on-surface tracking-tight">AirPods Pro</h1>
+<button class="hover:bg-neutral-800/50 p-1.5 rounded-full transition-colors active:scale-90">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant" data-icon="settings">settings</span>
+</button>
+</header>
+<!-- Content Body -->
+<main class="flex-1 flex flex-col p-3.5 space-y-3 overflow-hidden">
+<!-- Hero Section (130px) -->
+<section class="h-[130px] flex items-center justify-center relative">
+<div class="absolute w-24 h-24 bg-primary/20 blur-[40px] rounded-full"></div>
+<img class="w-[100px] h-auto object-contain relative z-10" data-alt="Photorealistic 3D render of professional wireless earbuds in their charging case, soft dramatic studio lighting with blue accent highlights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnZFws53J_MPeH_w3RjBdZq3lXMghukOgUazKPc4VvwB9P_a0UBJXt7xVIthCcvh6CHd1FVKw2dYJVfbvRJOccRuAMtXXs8GDKokKHOhbodVVx9nqr08KHfPoqQU76mKV19UxHT8rGn1hwPmO0ZKqAp9zcT5nDXBkCyEAbsTHiEOkFpASgiRvmi2h4faK0LmOuGysaYUko96jqd7JIPXA51PEDicOPJm97tn41s6o12AmBy6BlrcvE8DDh1dMKWzkc1v48n9NA200"/>
+</section>
+<!-- Battery Row (110px) -->
+<section class="h-[110px] flex justify-between items-center px-2">
+<!-- Left Bud -->
+<div class="flex flex-col items-center space-y-1.5">
+<div class="relative w-[60px] h-[60px] flex items-center justify-center">
+<svg class="w-full h-full -rotate-90">
+<circle class="text-surface-container-highest" cx="30" cy="30" fill="transparent" r="28" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-primary" cx="30" cy="30" fill="transparent" r="28" stroke="currentColor" stroke-dasharray="175.9" stroke-dashoffset="35.18" stroke-linecap="round" stroke-width="4"></circle>
+</svg>
+<span class="absolute text-[16px] font-bold text-on-surface">80%</span>
+</div>
+<span class="text-[9px] font-medium tracking-[0.1em] text-on-surface-variant uppercase">LEFT</span>
+</div>
+<!-- Case -->
+<div class="flex flex-col items-center space-y-1.5">
+<div class="relative w-[60px] h-[60px] flex items-center justify-center">
+<svg class="w-full h-full -rotate-90">
+<circle class="text-surface-container-highest" cx="30" cy="30" fill="transparent" r="28" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-secondary" cx="30" cy="30" fill="transparent" r="28" stroke="currentColor" stroke-dasharray="175.9" stroke-dashoffset="0" stroke-linecap="round" stroke-width="4"></circle>
+</svg>
+<span class="absolute text-[16px] font-bold text-on-surface">100%</span>
+</div>
+<span class="text-[9px] font-medium tracking-[0.1em] text-on-surface-variant uppercase">CASE</span>
+</div>
+<!-- Right Bud -->
+<div class="flex flex-col items-center space-y-1.5">
+<div class="relative w-[60px] h-[60px] flex items-center justify-center">
+<svg class="w-full h-full -rotate-90">
+<circle class="text-surface-container-highest" cx="30" cy="30" fill="transparent" r="28" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-primary" cx="30" cy="30" fill="transparent" r="28" stroke="currentColor" stroke-dasharray="175.9" stroke-dashoffset="8.79" stroke-linecap="round" stroke-width="4"></circle>
+</svg>
+<span class="absolute text-[16px] font-bold text-on-surface">95%</span>
+</div>
+<span class="text-[9px] font-medium tracking-[0.1em] text-on-surface-variant uppercase">RIGHT</span>
+</div>
+</section>
+<!-- Noise Control Pill (36px) -->
+<section class="h-9 glass-card rounded-full p-1 flex items-center">
+<button class="flex-1 h-full flex items-center justify-center rounded-full transition-all">
+<span class="text-[9px] font-black tracking-widest text-on-surface-variant">OFF</span>
+</button>
+<button class="flex-1 h-full flex items-center justify-center rounded-full transition-all">
+<span class="text-[9px] font-black tracking-widest text-on-surface-variant">TRANSP</span>
+</button>
+<button class="flex-1 h-full flex items-center justify-center bg-primary rounded-full transition-all shadow-lg">
+<span class="text-[9px] font-black tracking-widest text-on-primary">ADAPT</span>
+</button>
+<button class="flex-1 h-full flex items-center justify-center rounded-full transition-all">
+<span class="text-[9px] font-black tracking-widest text-on-surface-variant">ANC</span>
+</button>
+</section>
+<!-- Feature Card -->
+<section class="glass-card rounded-2xl flex flex-col divide-y divide-white/5">
+<!-- Row 1: Conversational Awareness -->
+<div class="h-12 flex items-center px-3 justify-between">
+<div class="flex items-center space-x-3">
+<div class="w-9 h-9 flex items-center justify-center bg-surface-container-highest rounded-xl">
+<span class="material-symbols-outlined text-[20px] text-primary" data-icon="record_voice_over">record_voice_over</span>
+</div>
+<span class="text-[13px] font-medium text-on-surface">Conversational Awareness</span>
+</div>
+<div class="w-9 h-5 bg-primary/20 rounded-full relative p-0.5 cursor-pointer">
+<div class="w-4 h-4 bg-primary rounded-full absolute right-0.5"></div>
+</div>
+</div>
+<!-- Row 2: Spatial Audio -->
+<div class="h-12 flex items-center px-3 justify-between">
+<div class="flex items-center space-x-3">
+<div class="w-9 h-9 flex items-center justify-center bg-surface-container-highest rounded-xl">
+<span class="material-symbols-outlined text-[20px] text-tertiary" data-icon="spatial_audio_off">spatial_audio_off</span>
+</div>
+<span class="text-[13px] font-medium text-on-surface">Spatial Audio</span>
+</div>
+<div class="w-9 h-5 bg-surface-container-highest rounded-full relative p-0.5 cursor-pointer">
+<div class="w-4 h-4 bg-on-surface-variant rounded-full"></div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Strip (36px) -->
+<footer class="h-9 px-3.5 border-t border-white/5 flex items-center bg-neutral-950/40">
+<button class="flex items-center justify-between w-full group">
+<span class="text-[12px] font-medium text-on-surface-variant group-hover:text-on-surface transition-colors">More Settings...</span>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant group-hover:translate-x-0.5 transition-transform" data-icon="chevron_right">chevron_right</span>
+</button>
+</footer>
+</div>
+</body></html>

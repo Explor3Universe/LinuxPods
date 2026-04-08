@@ -1,54 +1,54 @@
 import QtQuick 2.15
 
-// PodColumn — single AirPod / case slot in the hero grid.
-// Stitch redesign: large circular ring around the device image,
-// uppercase tracking-wide label below, big percentage number.
-// Public API (inEar, iconSource, batteryLevel, isCharging, indicator)
-// is unchanged from the original implementation.
+// Compact PodColumn for the dropdown popup (Stitch "LinuxPods Tray Panel").
+// Number is rendered INSIDE the ring (not below); slot label sits under
+// the ring as a tiny uppercase tracking-wide caption.
 Column {
     id: root
 
     property bool inEar: true
-    property string iconSource
+    property string iconSource    // unused in compact layout (no inline image)
     property int batteryLevel: 0
     property bool isCharging: false
     property string indicator: ""
 
-    // Faded look when the pod is out of the ear (legacy behaviour).
-    property real targetOpacity: inEar ? 1 : 0.45
+    property real targetOpacity: inEar ? 1 : 0.5
     Behavior on opacity {
-        NumberAnimation { duration: 250; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
     }
     onInEarChanged: root.opacity = root.targetOpacity
     Component.onCompleted: root.opacity = root.targetOpacity
 
     spacing: 6
 
-    // Ring + image stack — compact for dropdown popup
+    // Ring + percent stack (60x60 like Stitch reference)
     Item {
         anchors.horizontalCenter: parent.horizontalCenter
-        width: 64
-        height: 64
+        width: 60
+        height: 60
 
         BatteryIndicator {
             anchors.fill: parent
             batteryLevel: root.batteryLevel
             isCharging: root.isCharging
-            indicator: root.indicator
+            // Case ring (no L/R indicator) goes secondary-green when >= 95%
+            ringColor: (root.indicator === "" && root.batteryLevel >= 95)
+                ? "#70f9af"
+                : "#7bafff"
         }
 
-        Image {
+        // Percent number INSIDE the ring
+        Text {
             anchors.centerIn: parent
-            source: root.iconSource
-            width: root.indicator === "" ? 38 : 32
-            height: width
-            fillMode: Image.PreserveAspectFit
-            mipmap: true
-            mirror: root.indicator === "R"
+            text: root.batteryLevel + "%"
+            color: "#ffffff"
+            font.family: "Inter"
+            font.pixelSize: 14
+            font.weight: Font.Bold
         }
     }
 
-    // Slot label (LEFT / RIGHT / CASE)
+    // Slot label
     Text {
         anchors.horizontalCenter: parent.horizontalCenter
         text: {
@@ -58,31 +58,8 @@ Column {
         }
         color: "#9a9996"
         font.family: "Inter"
-        font.pixelSize: 8
-        font.bold: true
-        font.letterSpacing: 1.4
-    }
-
-    // Battery percentage
-    Row {
-        anchors.horizontalCenter: parent.horizontalCenter
-        spacing: 1
-
-        Text {
-            text: root.batteryLevel
-            color: "#ffffff"
-            font.family: "Inter"
-            font.pixelSize: 16
-            font.weight: Font.Black
-        }
-        Text {
-            text: "%"
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 2
-            color: Qt.rgba(1, 1, 1, 0.55)
-            font.family: "Inter"
-            font.pixelSize: 10
-            font.weight: Font.Bold
-        }
+        font.pixelSize: 9
+        font.weight: Font.Medium
+        font.letterSpacing: 1.0
     }
 }

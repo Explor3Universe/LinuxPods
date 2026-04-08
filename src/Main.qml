@@ -21,12 +21,12 @@ import QtQuick.Effects
 ApplicationWindow {
     id: mainWindow
     visible: !airPodsTrayApp.hideOnStart
-    width: 380
-    height: 620
-    minimumWidth: 360
-    minimumHeight: 540
-    maximumWidth: 440
-    maximumHeight: 720
+    width: 360
+    height: 540
+    minimumWidth: 340
+    minimumHeight: 480
+    maximumWidth: 400
+    maximumHeight: 620
     title: "LinuxPods"
     objectName: "mainWindowObject"
     color: "transparent"
@@ -38,51 +38,51 @@ ApplicationWindow {
 
     property bool _hadFocus: false
     property bool _autoHide: Qt.application.arguments.indexOf("--no-autohide") === -1
-    property int _targetY: 40
-    property real _slideOffset: 0   // 0 = parked at _targetY, >0 = above
 
-    // Animated slide-down. Start with the popup parked ~120 px above its
-    // final position with opacity 0; the OutCubic animation slides it
-    // into place over ~450 ms — enough to feel like it's dropping out
-    // of the top system panel.
-    y: _targetY - _slideOffset
-    opacity: _slideOffset === 0 ? 1.0 : Math.max(0.0, 1.0 - _slideOffset / 120)
-
-    Behavior on _slideOffset {
-        NumberAnimation { duration: 450; easing.type: Easing.OutCubic }
-    }
-
-    function showFromTopPanel() {
-        const screen = Qt.application.primaryScreen || Qt.application.screens[0];
-        if (screen) {
-            mainWindow.x = screen.virtualX + screen.width - mainWindow.width - 16;
-            mainWindow._targetY = screen.virtualY + 40;
-        }
-        mainWindow._slideOffset = 120;   // park above
-        mainWindow.visible = true;
-        Qt.callLater(() => {
-            mainWindow.raise();
-            mainWindow.requestActivate();
-            mainWindow._slideOffset = 0;   // animate down
-        });
+    // Slide-down: animate y from (target - 80) to target. Plain visible window,
+    // no opacity tricks (which were leaving the popup invisible at startup).
+    Behavior on y {
+        NumberAnimation { duration: 380; easing.type: Easing.OutCubic }
     }
 
     Component.onCompleted: {
-        showFromTopPanel();
+        const screen = Qt.application.primaryScreen || Qt.application.screens[0];
+        const targetX = screen ? screen.virtualX + screen.width - mainWindow.width - 16 : 100;
+        const targetY = screen ? screen.virtualY + 40 : 40;
+
+        // Place above the screen first so the Behavior animates down on next frame.
+        mainWindow.x = targetX;
+        mainWindow.y = targetY - 80;
+        mainWindow.visible = true;
+
+        slideTimer.targetY = targetY;
+        slideTimer.start();
+    }
+
+    Timer {
+        id: slideTimer
+        interval: 30
+        property int targetY: 40
+        onTriggered: {
+            mainWindow.y = targetY;
+            mainWindow.raise();
+            mainWindow.requestActivate();
+        }
     }
 
     onActiveChanged: {
         if (active) {
             _hadFocus = true;
         } else if (_autoHide && _hadFocus && visible) {
-            mainWindow._slideOffset = 120;   // animate out
+            // Slide out and then hide.
+            mainWindow.y = mainWindow.y - 80;
             hideTimer.start();
         }
     }
 
     Timer {
         id: hideTimer
-        interval: 480
+        interval: 420
         onTriggered: mainWindow.visible = false
     }
 
@@ -217,7 +217,7 @@ ApplicationWindow {
                 anchors.top: topBar.bottom
                 anchors.left: parent.left
                 anchors.right: parent.right
-                anchors.bottom: parent.bottom
+                anchors.bottom: bottomBar.top
                 contentWidth: width
                 clip: true
                 ScrollBar.vertical.policy: ScrollBar.AsNeeded
@@ -248,41 +248,41 @@ ApplicationWindow {
                         }
                     }
 
-                    // ── Compact hero ─────────────────────────────────
+                    // ── Compact hero (Stitch: 100px image + 96px halo blur 40px) ─
                     Item {
                         Layout.fillWidth: true
-                        Layout.topMargin: 6
+                        Layout.topMargin: 4
                         Layout.preferredHeight: 130
 
                         Rectangle {
                             id: heroGlowSource
                             anchors.centerIn: parent
-                            width: 110
-                            height: 110
+                            width: 90
+                            height: 90
                             radius: width / 2
-                            color: "#3584e4"
+                            color: "#7bafff"
                             visible: false
                             layer.enabled: true
                         }
 
                         MultiEffect {
                             anchors.centerIn: parent
-                            width: 220
-                            height: 220
+                            width: 200
+                            height: 200
                             source: heroGlowSource
                             blurEnabled: true
                             blur: 1.0
-                            blurMax: 96
-                            blurMultiplier: 1.4
-                            opacity: 0.18
+                            blurMax: 64
+                            blurMultiplier: 1.2
+                            opacity: 0.20
                             autoPaddingEnabled: true
                         }
 
                         Image {
                             anchors.centerIn: parent
                             source: "qrc:/icons/assets/airpods.png"
-                            width: 120
-                            height: 120
+                            width: 100
+                            height: 100
                             fillMode: Image.PreserveAspectFit
                             mipmap: true
                             smooth: true
@@ -393,54 +393,103 @@ ApplicationWindow {
                         }
                     }
 
-                    // ── Section: FEATURES ────────────────────────────
-                    Text {
-                        Layout.leftMargin: 18
-                        Layout.topMargin: 4
-                        text: qsTr("FEATURES")
-                        color: "#9a9996"
-                        font.family: "Inter"
-                        font.pixelSize: 9
-                        font.bold: true
-                        font.letterSpacing: 2.0
-                        visible: airPodsTrayApp.airpodsConnected
-                    }
-
-                    // Feature card: Conversational Awareness
-                    FeatureCard {
+                    // ── Features card (single glass with divide-y rows) ──
+                    Rectangle {
                         Layout.fillWidth: true
                         Layout.leftMargin: 14
                         Layout.rightMargin: 14
-                        title: qsTr("Conversational Awareness")
-                        subtitle: qsTr("Lowers media when you speak")
-                        icon: "\u2B25"
-                        checked: airPodsTrayApp.deviceInfo.conversationalAwareness
+                        Layout.topMargin: 2
+                        Layout.preferredHeight: 129
+                        radius: 16
+                        color: Qt.rgba(30 / 255, 30 / 255, 30 / 255, 0.55)
+                        border.width: 1
+                        border.color: Qt.rgba(1, 1, 1, 0.06)
                         visible: airPodsTrayApp.airpodsConnected
-                        onToggled: (v) => airPodsTrayApp.setConversationalAwareness(v)
+
+                        ColumnLayout {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.top: parent.top
+                            spacing: 0
+
+                            SettingRow {
+                                label: qsTr("Conversational Awareness")
+                                iconText: "\u2B25"
+                                iconColor: "#7bafff"
+                                type: "toggle"
+                                toggleChecked: airPodsTrayApp.deviceInfo.conversationalAwareness
+                                onToggleClicked: airPodsTrayApp.setConversationalAwareness(!toggleChecked)
+                            }
+                            Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: Qt.rgba(1, 1, 1, 0.05) }
+                            SettingRow {
+                                label: qsTr("Hearing Aid Mode")
+                                iconText: "\u266B"
+                                iconColor: "#eda8ff"
+                                type: "toggle"
+                                toggleChecked: airPodsTrayApp.deviceInfo.hearingAidEnabled
+                                clickable: true
+                                onRowClicked: stackView.push(hearingAidPage)
+                                onToggleClicked: airPodsTrayApp.setHearingAidEnabled(!toggleChecked)
+                            }
+                        }
                     }
 
-                    // Feature card: Hearing Aid (clickable — opens dedicated page)
-                    FeatureCard {
-                        Layout.fillWidth: true
-                        Layout.leftMargin: 14
-                        Layout.rightMargin: 14
-                        title: qsTr("Hearing Aid Mode")
-                        subtitle: qsTr("Tap to configure profile")
-                        icon: "\u266B"
-                        checked: airPodsTrayApp.deviceInfo.hearingAidEnabled
-                        visible: airPodsTrayApp.airpodsConnected
-                        cardClickable: true
-                        onCardClicked: stackView.push(hearingAidPage)
-                        onToggled: (v) => airPodsTrayApp.setHearingAidEnabled(v)
-                    }
-
-                    // Bottom spacer
+                    // Spacer + bottom margin
                     Item {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 12
+                        Layout.preferredHeight: 6
                     }
                 }
             }
+
+            // ── Bottom strip: "More Settings..." link ─────────────────
+            Rectangle {
+                id: bottomBar
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: 36
+                color: Qt.rgba(0, 0, 0, 0.40)
+                z: 100
+
+                Rectangle {
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    height: 1
+                    color: Qt.rgba(1, 1, 1, 0.05)
+                }
+
+                MouseArea {
+                    id: footerHover
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: stackView.push(settingsPage)
+                }
+
+                Text {
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.leftMargin: 16
+                    text: qsTr("More Settings...")
+                    color: footerHover.containsMouse ? "#ffffff" : "#9a9996"
+                    font.family: "Inter"
+                    font.pixelSize: 12
+                    font.weight: Font.Medium
+                }
+                Text {
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.rightMargin: 16
+                    text: "\u203A"
+                    color: footerHover.containsMouse ? "#ffffff" : "#9a9996"
+                    font.family: "Inter"
+                    font.pixelSize: 16
+                    font.bold: true
+                }
+            }
+
         }
     }
 

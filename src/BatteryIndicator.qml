@@ -34,8 +34,8 @@ Item {
     onBatteryLevelChanged: animatedLevel = batteryLevel
     Component.onCompleted: animatedLevel = batteryLevel
 
-    width: 64
-    height: 64
+    width: 60
+    height: 60
 
     Canvas {
         id: canvas
