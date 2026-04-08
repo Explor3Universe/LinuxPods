@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
+import QtQuick.Effects
 
 // LinuxPods main window — Stitch redesign.
 //
@@ -34,18 +35,6 @@ ApplicationWindow {
             GradientStop { position: 0.0; color: "#1a1c24" }
             GradientStop { position: 0.35; color: "#0e0e0e" }
             GradientStop { position: 1.0; color: "#000000" }
-        }
-
-        // Subtle primary-tinted top glow.
-        Rectangle {
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.top
-            anchors.topMargin: -160
-            width: 380
-            height: 380
-            radius: width / 2
-            color: Qt.rgba(53 / 255, 132 / 255, 228 / 255, 0.12)
-            opacity: 0.85
         }
     }
 
@@ -96,9 +85,103 @@ ApplicationWindow {
     Component {
         id: mainPage
         Item {
+
+            // ── Fixed Top App Bar (Stitch reference) ─────────────────
+            // bg-black/40 + backdrop-blur + border-b border-white/5
+            Rectangle {
+                id: topBar
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: 64
+                color: Qt.rgba(0, 0, 0, 0.55)
+                z: 100
+
+                Rectangle {
+                    anchors.bottom: parent.bottom
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    height: 1
+                    color: Qt.rgba(1, 1, 1, 0.05)
+                }
+
+                // Left: hamburger menu icon + title
+                Row {
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.leftMargin: 22
+                    spacing: 14
+
+                    Rectangle {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 36
+                        height: 36
+                        radius: 18
+                        color: menuHover.containsMouse ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
+
+                        // Hamburger glyph (3 horizontal bars) drawn as 3 rectangles
+                        Column {
+                            anchors.centerIn: parent
+                            spacing: 4
+                            Rectangle { width: 16; height: 2; radius: 1; color: Qt.rgba(1, 1, 1, 0.85) }
+                            Rectangle { width: 16; height: 2; radius: 1; color: Qt.rgba(1, 1, 1, 0.85) }
+                            Rectangle { width: 16; height: 2; radius: 1; color: Qt.rgba(1, 1, 1, 0.85) }
+                        }
+
+                        MouseArea {
+                            id: menuHover
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                        }
+                    }
+
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: airPodsTrayApp.deviceInfo.deviceName
+                            ? airPodsTrayApp.deviceInfo.deviceName.toUpperCase()
+                            : "AIRPODS PRO"
+                        color: Qt.rgba(1, 1, 1, 0.92)
+                        font.family: "Inter"
+                        font.pixelSize: 13
+                        font.bold: true
+                        font.letterSpacing: 2.2
+                    }
+                }
+
+                // Right: settings gear
+                Rectangle {
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.rightMargin: 22
+                    width: 36
+                    height: 36
+                    radius: 18
+                    color: settingsHover.containsMouse ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "\uf958"
+                        font.family: iconFont.name
+                        font.pixelSize: 16
+                        color: Qt.rgba(1, 1, 1, 0.75)
+                    }
+
+                    MouseArea {
+                        id: settingsHover
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: stackView.push(settingsPage)
+                    }
+                }
+            }
+
             ScrollView {
-                anchors.fill: parent
-                anchors.margins: 0
+                anchors.top: topBar.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
                 contentWidth: width
                 clip: true
                 ScrollBar.vertical.policy: ScrollBar.AsNeeded
@@ -106,58 +189,6 @@ ApplicationWindow {
                 ColumnLayout {
                     width: parent.width
                     spacing: 18
-
-                    // ── Title strip (compact "top app bar") ──────────
-                    Item {
-                        Layout.fillWidth: true
-                        Layout.topMargin: 18
-                        Layout.leftMargin: 22
-                        Layout.rightMargin: 22
-                        Layout.preferredHeight: 32
-
-                        Text {
-                            anchors.left: parent.left
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: airPodsTrayApp.deviceInfo.deviceName
-                                ? airPodsTrayApp.deviceInfo.deviceName.toUpperCase()
-                                : "AIRPODS"
-                            color: Qt.rgba(1, 1, 1, 0.92)
-                            font.family: "Inter"
-                            font.pixelSize: 13
-                            font.bold: true
-                            font.letterSpacing: 1.8
-                        }
-
-                        // Settings button (uses bundled SF Symbols font for the gear glyph)
-                        Rectangle {
-                            anchors.right: parent.right
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: 32
-                            height: 32
-                            radius: 16
-                            color: settingsHover.containsMouse
-                                ? Qt.rgba(1, 1, 1, 0.08)
-                                : "transparent"
-                            border.width: 1
-                            border.color: Qt.rgba(1, 1, 1, 0.06)
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: "\uf958"  // gear glyph from bundled SF Symbols font
-                                font.family: iconFont.name
-                                font.pixelSize: 16
-                                color: Qt.rgba(1, 1, 1, 0.75)
-                            }
-
-                            MouseArea {
-                                id: settingsHover
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: stackView.push(settingsPage)
-                            }
-                        }
-                    }
 
                     // ── Disconnected pill (only when not connected) ──
                     Rectangle {
@@ -181,34 +212,44 @@ ApplicationWindow {
                         }
                     }
 
-                    // ── Hero: big device image with primary glow ─────
+                    // ── Hero: big device image with primary blur glow ──
                     Item {
                         Layout.fillWidth: true
                         Layout.topMargin: 0
-                        Layout.preferredHeight: 170
+                        Layout.preferredHeight: 200
 
-                        // Outer glow halo
+                        // Source circle for the blur — invisible itself,
+                        // serves only as input to MultiEffect.
                         Rectangle {
+                            id: heroGlowSource
                             anchors.centerIn: parent
-                            width: 220
-                            height: 220
+                            width: 160
+                            height: 160
                             radius: width / 2
-                            color: Qt.rgba(53 / 255, 132 / 255, 228 / 255, 0.10)
+                            color: "#3584e4"
+                            visible: false
+                            layer.enabled: true
                         }
-                        // Inner glow halo
-                        Rectangle {
+
+                        // Real Gaussian blur — equivalent of CSS blur(80px)
+                        MultiEffect {
                             anchors.centerIn: parent
-                            width: 170
-                            height: 170
-                            radius: width / 2
-                            color: Qt.rgba(53 / 255, 132 / 255, 228 / 255, 0.16)
+                            width: 320
+                            height: 320
+                            source: heroGlowSource
+                            blurEnabled: true
+                            blur: 1.0
+                            blurMax: 96
+                            blurMultiplier: 1.4
+                            opacity: 0.55
+                            autoPaddingEnabled: true
                         }
 
                         Image {
                             anchors.centerIn: parent
                             source: "qrc:/icons/assets/airpods.png"
-                            width: 150
-                            height: 150
+                            width: 160
+                            height: 160
                             fillMode: Image.PreserveAspectFit
                             mipmap: true
                             smooth: true
