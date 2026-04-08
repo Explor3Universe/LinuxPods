@@ -1,0 +1,7 @@
+out/
+rpmbuild/
+*.rpm
+*.tar.gz
+*.log
+.vscode/
+.idea/
