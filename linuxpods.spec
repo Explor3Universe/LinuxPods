@@ -1,16 +1,11 @@
-%global commit 1f2d70744fe6daa6f119172f1e4771300dd05814
-%global shortcommit %(c=%{commit}; echo ${c:0:7})
-%global upstream_name librepods
-%global upstream_owner kavishdevar
-
 Name:           linuxpods
 Version:        0.1.0
-Release:        1.git%{shortcommit}%{?dist}
+Release:        1%{?dist}
 Summary:        AirPods control and battery monitor for Linux (KDE/Qt6)
 
 License:        GPL-3.0-or-later
 URL:            https://github.com/Puerh0x1/LinuxPods
-Source0:        https://github.com/%{upstream_owner}/%{upstream_name}/archive/%{commit}/%{upstream_name}-%{shortcommit}.tar.gz
+Source0:        %{name}-%{version}.tar.gz
 
 BuildRequires:  cmake >= 3.16
 BuildRequires:  gcc-c++
@@ -32,9 +27,13 @@ Requires:       pulseaudio-libs
 Requires:       bluez
 
 %description
-LinuxPods is a Fedora/RHEL RPM packaging of LibrePods — a native Linux
-application that unlocks Apple AirPods features on non-Apple devices via
-the reverse-engineered Apple Accessory Protocol (AAP) over L2CAP.
+LinuxPods is a Fedora/RHEL fork of LibrePods — a native Linux application
+that unlocks Apple AirPods features on non-Apple devices via the
+reverse-engineered Apple Accessory Protocol (AAP) over L2CAP.
+
+This package builds the bundled (vendored) source tree under src/, which
+allows local modifications to the UI (QML) and core logic without
+depending on a remote upstream snapshot.
 
 Features:
   * Battery status (left earbud, right earbud, case)
@@ -44,18 +43,17 @@ Features:
   * Connection notifications
   * KDE/Qt6 system tray integration
 
-Tested on AirPods Pro 2 (USB-C, 2024). Should work with other AirPods
-models with reduced feature set.
+Tested on AirPods Pro 2 (USB-C, 2024) on Fedora 43 + KDE Plasma 6.
 
 Upstream project: https://github.com/kavishdevar/librepods
 
 %prep
-%autosetup -n %{upstream_name}-%{commit}
+%autosetup -n %{name}-%{version}
 
 %build
 mkdir -p build
 cd build
-cmake ../linux \
+cmake .. \
     -DCMAKE_INSTALL_PREFIX=%{_prefix} \
     -DCMAKE_INSTALL_BINDIR=%{_bindir} \
     -DCMAKE_INSTALL_LIBDIR=%{_libdir} \
@@ -70,7 +68,7 @@ make install DESTDIR=%{buildroot}
 
 %files
 %license LICENSE
-%doc linux/README.md
+%doc README.md
 %{_bindir}/librepods
 %{_bindir}/librepods-ctl
 %{_datadir}/applications/me.kavishdevar.librepods.desktop
@@ -78,6 +76,7 @@ make install DESTDIR=%{buildroot}
 %{_datadir}/librepods/translations/librepods_tr.qm
 
 %changelog
-* Wed Apr 08 2026 Nick <noreply@github.com> - 0.1.0-1.git1f2d707
-- Initial RPM packaging of LibrePods for Fedora
-- Built from upstream commit 1f2d707
+* Wed Apr 08 2026 Nick <noreply@github.com> - 0.1.0-1
+- Switch to vendored source tree under src/
+- Allows local UI/QML modifications without upstream dependency
+- Initial fork from upstream librepods commit 1f2d707

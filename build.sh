@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Build LinuxPods RPM from upstream librepods.
-# Usage: ./build.sh
+# Build LinuxPods RPM from the vendored source tree under ./src/.
+# Usage: ./build.sh [--skip-deps]
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SPEC="$SCRIPT_DIR/linuxpods.spec"
+SRC_DIR="$SCRIPT_DIR/src"
 OUTDIR="$SCRIPT_DIR/out"
 
 # rpmbuild + cmake misbehave when paths contain spaces. Build in a
@@ -31,28 +32,46 @@ if [[ ! -f "$SPEC" ]]; then
     echo "ERROR: $SPEC not found" >&2
     exit 1
 fi
-
-# Extract upstream commit hash from spec (simple grep — works on any rpm version).
-COMMIT=$(grep -oP '^%global commit \K\S+' "$SPEC")
-if [[ -z "$COMMIT" ]]; then
-    echo "ERROR: could not extract commit hash from $SPEC" >&2
+if [[ ! -d "$SRC_DIR" ]]; then
+    echo "ERROR: $SRC_DIR not found — vendored sources missing" >&2
     exit 1
 fi
-SHORTCOMMIT="${COMMIT:0:7}"
-UPSTREAM="librepods"
-TARBALL="${UPSTREAM}-${SHORTCOMMIT}.tar.gz"
-TARBALL_URL="https://github.com/kavishdevar/${UPSTREAM}/archive/${COMMIT}/${TARBALL}"
+
+# Read Name and Version from the spec.
+NAME=$(awk '/^Name:/    {print $2; exit}' "$SPEC")
+VERSION=$(awk '/^Version:/ {print $2; exit}' "$SPEC")
+TARBALL="${NAME}-${VERSION}.tar.gz"
 
 echo ">>> Preparing rpmbuild tree at $TOPDIR"
 mkdir -p "$TOPDIR"/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
 mkdir -p "$OUTDIR"
 
-if [[ ! -f "$TOPDIR/SOURCES/$TARBALL" ]]; then
-    echo ">>> Downloading $TARBALL_URL"
-    curl -fL --retry 3 -o "$TOPDIR/SOURCES/$TARBALL" "$TARBALL_URL"
-else
-    echo ">>> Using cached $TOPDIR/SOURCES/$TARBALL"
-fi
+echo ">>> Building source tarball from $SRC_DIR"
+# Pack src/* into ${NAME}-${VERSION}/* using --transform.
+tar czf "$TOPDIR/SOURCES/$TARBALL" \
+    --transform="s|^src|${NAME}-${VERSION}|" \
+    -C "$SCRIPT_DIR" \
+    src
+
+# Include the LICENSE and README at the top level of the tarball so the
+# spec can pick them up via %license and %doc.
+TMP_EXTRA="$(mktemp -d)"
+trap 'rm -rf "$TMP_EXTRA"' EXIT
+mkdir -p "$TMP_EXTRA/${NAME}-${VERSION}"
+cp "$SCRIPT_DIR/LICENSE" "$TMP_EXTRA/${NAME}-${VERSION}/LICENSE"
+cp "$SCRIPT_DIR/README.md" "$TMP_EXTRA/${NAME}-${VERSION}/README.md"
+tar rzf "$TOPDIR/SOURCES/$TARBALL" -C "$TMP_EXTRA" "${NAME}-${VERSION}/LICENSE" "${NAME}-${VERSION}/README.md" 2>/dev/null || {
+    # rzf doesn't work on gzipped archives — re-pack from scratch.
+    UNPACK="$(mktemp -d)"
+    tar xzf "$TOPDIR/SOURCES/$TARBALL" -C "$UNPACK"
+    cp "$SCRIPT_DIR/LICENSE" "$UNPACK/${NAME}-${VERSION}/LICENSE"
+    cp "$SCRIPT_DIR/README.md" "$UNPACK/${NAME}-${VERSION}/README.md"
+    tar czf "$TOPDIR/SOURCES/$TARBALL" -C "$UNPACK" "${NAME}-${VERSION}"
+    rm -rf "$UNPACK"
+}
+
+echo ">>> Tarball:"
+ls -la "$TOPDIR/SOURCES/$TARBALL"
 
 cp "$SPEC" "$TOPDIR/SPECS/"
 
@@ -67,6 +86,7 @@ echo ">>> Running rpmbuild"
 rpmbuild --define "_topdir $TOPDIR" -ba "$TOPDIR/SPECS/$(basename "$SPEC")"
 
 echo ">>> Collecting artifacts to $OUTDIR"
+rm -f "$OUTDIR"/*.rpm
 find "$TOPDIR/RPMS" -name '*.rpm' -exec cp -v {} "$OUTDIR/" \;
 find "$TOPDIR/SRPMS" -name '*.rpm' -exec cp -v {} "$OUTDIR/" \;
 
@@ -74,4 +94,4 @@ echo ""
 echo "Done. Built RPMs:"
 ls -1 "$OUTDIR"/*.rpm
 echo ""
-echo "Install with:  sudo dnf install $OUTDIR/linuxpods-*.x86_64.rpm"
+echo "Install with:  sudo dnf install $OUTDIR/${NAME}-${VERSION}-*.x86_64.rpm"
