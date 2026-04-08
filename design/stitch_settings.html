@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LinuxPods Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#131313",
+                        "secondary-fixed-dim": "#60eaa2",
+                        "surface-variant": "#262626",
+                        "on-secondary-fixed-variant": "#00673f",
+                        "on-tertiary-container": "#550b6d",
+                        "on-surface": "#ffffff",
+                        "surface-container-highest": "#262626",
+                        "on-secondary": "#005c37",
+                        "surface": "#0e0e0e",
+                        "surface-container": "#191a1a",
+                        "secondary": "#70f9af",
+                        "primary-dim": "#589fff",
+                        "tertiary-container": "#e496f9",
+                        "primary-fixed-dim": "#4a94f5",
+                        "secondary-dim": "#60eaa2",
+                        "on-primary": "#002e5d",
+                        "on-tertiary-fixed-variant": "#5f1876",
+                        "inverse-surface": "#fcf9f8",
+                        "on-secondary-fixed": "#00472a",
+                        "on-background": "#ffffff",
+                        "inverse-primary": "#005fb3",
+                        "surface-container-lowest": "#000000",
+                        "on-tertiary": "#601a77",
+                        "primary": "#7bafff",
+                        "on-surface-variant": "#adabaa",
+                        "tertiary": "#eda8ff",
+                        "surface-tint": "#7bafff",
+                        "outline-variant": "#484848",
+                        "on-error": "#490006",
+                        "on-primary-fixed": "#000000",
+                        "tertiary-fixed": "#e496f9",
+                        "secondary-fixed": "#70f9af",
+                        "inverse-on-surface": "#565555",
+                        "on-tertiary-fixed": "#320043",
+                        "on-secondary-container": "#e2ffe9",
+                        "surface-bright": "#2c2c2c",
+                        "error-dim": "#d7383b",
+                        "background": "#0e0e0e",
+                        "outline": "#767575",
+                        "on-primary-container": "#002348",
+                        "error": "#ff716c",
+                        "surface-container-high": "#1f2020",
+                        "error-container": "#9f0519",
+                        "on-error-container": "#ffa8a3",
+                        "tertiary-dim": "#d589eb",
+                        "primary-fixed": "#5ea2ff",
+                        "on-primary-fixed-variant": "#002c59",
+                        "primary-container": "#5ea2ff",
+                        "surface-dim": "#0e0e0e",
+                        "tertiary-fixed-dim": "#d589eb",
+                        "secondary-container": "#006d42"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+            -webkit-font-smoothing: antialiased;
+        }
+        .glass-card {
+            background: rgba(30, 30, 30, 0.55);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body min-h-screen">
+<!-- TopAppBar from Shared Components JSON -->
+<header class="fixed top-0 w-full z-50 bg-[#131313]/80 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.4)]">
+<div class="flex items-center justify-between px-6 h-16 w-full">
+<button class="hover:bg-white/10 transition-colors active:scale-95 duration-200 p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-[#7bafff]">arrow_back</span>
+</button>
+<h1 class="font-['Inter'] font-semibold tracking-tight uppercase text-white">SETTINGS</h1>
+<div class="w-10"></div> <!-- Spacer for centering -->
+</div>
+</header>
+<main class="pt-24 pb-12 px-6 max-w-md mx-auto space-y-10">
+<!-- Hero AirPods Visual -->
+<section class="flex flex-col items-center py-4">
+<div class="relative w-64 h-48 flex justify-center items-end">
+<div class="absolute inset-0 bg-primary/10 blur-[80px] rounded-full"></div>
+<img class="w-40 h-auto object-contain z-10 drop-shadow-2xl" data-alt="Sleek white wireless earbuds floating in a dark environment with a soft blue neon glow behind them reflecting on their polished surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAb0MWsknYBmpNQMB5d9U-9JQVMWD4VO0ItIs5jHxVCnDVnSrsSrUXI3nNAfeZSZo9xztKye6LFJdh2NV8BnKIjhkVMo1W4s93hAa4vUK6xU9fTeTQT_mZLb91v-XOZs62gce80asbXzLH0RHX9-3iTa6js4OWXf8HPQdxxktM5j8-ZO6B3Fyn-fic0L1PnaQlGtiAF7dQlZP39cwOBiYuBZ_7Ot7F_cQWlsSW6zzqnHJ_yoYdQv9-7CZDP93RZncBjZ--oZNtomCA"/>
+</div>
+<div class="mt-6 text-center">
+<h2 class="text-2xl font-extrabold tracking-tight">LinuxPods Pro</h2>
+<p class="text-on-surface-variant text-sm mt-1">v3.2.0 (Stable Kernel)</p>
+</div>
+</section>
+<!-- GENERAL SECTION -->
+<section class="space-y-4">
+<h3 class="text-[10px] uppercase tracking-[0.2em] font-bold text-on-surface-variant px-2">GENERAL</h3>
+<div class="glass-card rounded-3xl overflow-hidden">
+<!-- Auto-start -->
+<div class="flex items-center justify-between p-5">
+<div class="flex items-center gap-4">
+<div class="w-11 h-11 bg-surface-container-highest rounded-2xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">login</span>
+</div>
+<span class="font-medium text-on-surface">Auto-start on login</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<!-- System notifications -->
+<div class="flex items-center justify-between p-5 border-t border-white/5">
+<div class="flex items-center gap-4">
+<div class="w-11 h-11 bg-surface-container-highest rounded-2xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">notifications</span>
+</div>
+<span class="font-medium text-on-surface">System notifications</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<!-- Cross-device -->
+<div class="flex items-center justify-between p-5 border-t border-white/5">
+<div class="flex items-center gap-4">
+<div class="w-11 h-11 bg-surface-container-highest rounded-2xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">devices_other</span>
+</div>
+<span class="font-medium text-on-surface">Cross-device with Android</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</section>
+<!-- EAR DETECTION -->
+<section class="space-y-4">
+<h3 class="text-[10px] uppercase tracking-[0.2em] font-bold text-on-surface-variant px-2">EAR DETECTION</h3>
+<div class="glass-card rounded-3xl p-5 space-y-6">
+<!-- Pause Behavior -->
+<div class="space-y-3">
+<div class="flex items-center gap-4 px-1">
+<div class="w-11 h-11 bg-surface-container-highest rounded-2xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">pause_circle</span>
+</div>
+<span class="font-medium text-on-surface">Pause behavior</span>
+</div>
+<div class="flex bg-surface-container-low p-1 rounded-2xl w-full">
+<button class="flex-1 py-2.5 px-2 text-xs font-bold rounded-xl transition-all bg-primary text-on-primary">ONE</button>
+<button class="flex-1 py-2.5 px-2 text-xs font-bold rounded-xl transition-all text-on-surface-variant hover:text-on-surface">BOTH</button>
+<button class="flex-1 py-2.5 px-2 text-xs font-bold rounded-xl transition-all text-on-surface-variant hover:text-on-surface">NEVER</button>
+</div>
+</div>
+<!-- One Bud ANC -->
+<div class="flex items-center justify-between pt-2">
+<div class="flex items-center gap-4">
+<div class="w-11 h-11 bg-surface-container-highest rounded-2xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">headphones</span>
+</div>
+<span class="font-medium text-on-surface">One bud ANC mode</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</section>
+<!-- CONNECTION -->
+<section class="space-y-4">
+<h3 class="text-[10px] uppercase tracking-[0.2em] font-bold text-on-surface-variant px-2">CONNECTION</h3>
+<div class="glass-card rounded-3xl overflow-hidden">
+<!-- Bluetooth Retry -->
+<div class="flex items-center justify-between p-5">
+<div class="flex items-center gap-4">
+<div class="w-11 h-11 bg-surface-container-highest rounded-2xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">replay</span>
+</div>
+<div class="flex flex-col">
+<span class="font-medium text-on-surface">Retry attempts</span>
+<span class="text-xs text-on-surface-variant">BT protocol fallback</span>
+</div>
+</div>
+<div class="flex items-center bg-surface-container-low rounded-xl p-1 gap-1">
+<button class="w-8 h-8 flex items-center justify-center hover:bg-white/5 rounded-lg active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-sm">remove</span>
+</button>
+<span class="w-8 text-center font-bold text-primary">3</span>
+<button class="w-8 h-8 flex items-center justify-center hover:bg-white/5 rounded-lg active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+</div>
+<!-- Rename -->
+<div class="p-5 border-t border-white/5 space-y-3">
+<div class="flex items-center gap-4">
+<div class="w-11 h-11 bg-surface-container-highest rounded-2xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">edit</span>
+</div>
+<span class="font-medium text-on-surface">Rename AirPods</span>
+</div>
+<input class="w-full bg-surface-container-low border-0 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/50 text-on-surface" type="text" value="LinuxPods Pro"/>
+</div>
+<!-- MAC Address -->
+<div class="p-5 border-t border-white/5 space-y-3">
+<div class="flex items-center gap-4">
+<div class="w-11 h-11 bg-surface-container-highest rounded-2xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">lan</span>
+</div>
+<span class="font-medium text-on-surface">Phone MAC address</span>
+</div>
+<input class="w-full bg-surface-container-low border-0 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/50 text-on-surface font-mono" placeholder="00:00:00:00:00:00" type="text"/>
+</div>
+</div>
+</section>
+<!-- ADVANCED -->
+<section class="space-y-4">
+<h3 class="text-[10px] uppercase tracking-[0.2em] font-bold text-on-surface-variant px-2">ADVANCED</h3>
+<button class="w-full glass-card rounded-3xl p-5 flex items-center justify-between group active:scale-[0.98] transition-all">
+<div class="flex items-center gap-4">
+<div class="w-11 h-11 bg-surface-container-highest rounded-2xl flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary">qr_code_2</span>
+</div>
+<div class="text-left">
+<span class="font-medium text-on-surface block">Magic Cloud Keys QR</span>
+<span class="text-xs text-on-surface-variant">Sync cross-platform identifiers</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform">chevron_right</span>
+</button>
+</section>
+<!-- Footer Info -->
+<footer class="pt-8 text-center">
+<div class="inline-flex items-center gap-2 px-4 py-2 bg-surface-container-highest/50 rounded-full">
+<div class="w-2 h-2 rounded-full bg-secondary animate-pulse"></div>
+<span class="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase">Kernel Link Active</span>
+</div>
+<p class="text-[10px] text-on-surface-variant/40 mt-4 uppercase tracking-tighter">Designed for Linux Distros v1.0.4-build-88</p>
+</footer>
+</main>
+</body></html>

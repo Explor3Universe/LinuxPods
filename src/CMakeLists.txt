@@ -56,6 +56,9 @@ qt_add_qml_module(librepods
         PodColumn.qml
         Icon.qml
         KeysQRDialog.qml
+        SettingsPage.qml
+        HearingAidPage.qml
+        SettingRow.qml
 )
 
 # Add the resource file

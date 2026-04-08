@@ -21,9 +21,9 @@ ApplicationWindow {
     id: mainWindow
     visible: !airPodsTrayApp.hideOnStart
     width: 480
-    height: 880
+    height: 920
     minimumWidth: 440
-    minimumHeight: 640
+    minimumHeight: 660
     title: "LinuxPods"
     objectName: "mainWindowObject"
     color: "transparent"
@@ -184,22 +184,22 @@ ApplicationWindow {
                     // ── Hero: big device image with primary glow ─────
                     Item {
                         Layout.fillWidth: true
-                        Layout.topMargin: 4
-                        Layout.preferredHeight: 200
+                        Layout.topMargin: 0
+                        Layout.preferredHeight: 170
 
                         // Outer glow halo
                         Rectangle {
                             anchors.centerIn: parent
-                            width: 260
-                            height: 260
+                            width: 220
+                            height: 220
                             radius: width / 2
                             color: Qt.rgba(53 / 255, 132 / 255, 228 / 255, 0.10)
                         }
                         // Inner glow halo
                         Rectangle {
                             anchors.centerIn: parent
-                            width: 190
-                            height: 190
+                            width: 170
+                            height: 170
                             radius: width / 2
                             color: Qt.rgba(53 / 255, 132 / 255, 228 / 255, 0.16)
                         }
@@ -207,8 +207,8 @@ ApplicationWindow {
                         Image {
                             anchors.centerIn: parent
                             source: "qrc:/icons/assets/airpods.png"
-                            width: 180
-                            height: 180
+                            width: 150
+                            height: 150
                             fillMode: Image.PreserveAspectFit
                             mipmap: true
                             smooth: true
@@ -365,16 +365,18 @@ ApplicationWindow {
                         onToggled: (v) => {}
                     }
 
-                    // Feature card: Hearing Aid
+                    // Feature card: Hearing Aid (clickable — opens dedicated page)
                     FeatureCard {
                         Layout.fillWidth: true
                         Layout.leftMargin: 22
                         Layout.rightMargin: 22
                         title: qsTr("Hearing Aid Mode")
-                        subtitle: qsTr("Amplifies environmental speech")
+                        subtitle: qsTr("Tap to configure profile")
                         icon: "\u266B"
                         checked: airPodsTrayApp.deviceInfo.hearingAidEnabled
                         visible: airPodsTrayApp.airpodsConnected
+                        cardClickable: true
+                        onCardClicked: stackView.push(hearingAidPage)
                         onToggled: (v) => airPodsTrayApp.setHearingAidEnabled(v)
                     }
 
@@ -455,153 +457,33 @@ ApplicationWindow {
     }
 
     // ─────────────────────────────────────────────────────────────────
-    //  SETTINGS PAGE — preserved from original, dark-tweaked
+    //  SETTINGS PAGE — Stitch redesign, loaded from SettingsPage.qml
     // ─────────────────────────────────────────────────────────────────
     Component {
         id: settingsPage
-        Page {
-            id: settingsPageItem
-            title: qsTr("Settings")
-            background: Rectangle { color: "transparent" }
-
-            ScrollView {
-                anchors.fill: parent
-
-                Column {
-                    width: parent.width
-                    spacing: 18
-                    padding: 22
-
-                    Label {
-                        text: qsTr("Settings")
-                        font.family: "Inter"
-                        font.pixelSize: 22
-                        font.bold: true
-                        color: "#ffffff"
-                        anchors.horizontalCenter: parent.horizontalCenter
-                    }
-
-                    Column {
-                        spacing: 6
-
-                        Label {
-                            text: qsTr("Pause Behavior When Removing AirPods:")
-                            color: "#9a9996"
-                            font.family: "Inter"
-                            font.pixelSize: 12
-                        }
-
-                        ComboBox {
-                            width: parent.width
-                            model: [qsTr("One Removed"), qsTr("Both Removed"), qsTr("Never")]
-                            currentIndex: airPodsTrayApp.earDetectionBehavior
-                            onActivated: airPodsTrayApp.earDetectionBehavior = currentIndex
-                        }
-                    }
-
-                    Switch {
-                        text: qsTr("Cross-Device Connectivity with Android")
-                        checked: airPodsTrayApp.crossDeviceEnabled
-                        onCheckedChanged: airPodsTrayApp.setCrossDeviceEnabled(checked)
-                    }
-
-                    Switch {
-                        text: qsTr("Auto-Start on Login")
-                        checked: airPodsTrayApp.autoStartManager.autoStartEnabled
-                        onCheckedChanged: airPodsTrayApp.autoStartManager.autoStartEnabled = checked
-                    }
-
-                    Switch {
-                        text: qsTr("Enable System Notifications")
-                        checked: airPodsTrayApp.notificationsEnabled
-                        onCheckedChanged: airPodsTrayApp.notificationsEnabled = checked
-                    }
-
-                    Switch {
-                        visible: airPodsTrayApp.airpodsConnected
-                        text: qsTr("One Bud ANC Mode")
-                        checked: airPodsTrayApp.deviceInfo.oneBudANCMode
-                        onCheckedChanged: airPodsTrayApp.deviceInfo.oneBudANCMode = checked
-
-                        ToolTip {
-                            visible: parent.hovered
-                            text: qsTr("Enable ANC when using one AirPod\n(More noise reduction, but uses more battery)")
-                            delay: 500
-                        }
-                    }
-
-                    Row {
-                        spacing: 6
-                        Label {
-                            text: qsTr("Bluetooth Retry Attempts:")
-                            color: "#9a9996"
-                            font.family: "Inter"
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-                        SpinBox {
-                            from: 1
-                            to: 10
-                            value: airPodsTrayApp.retryAttempts
-                            onValueChanged: airPodsTrayApp.retryAttempts = value
-                        }
-                    }
-
-                    Row {
-                        spacing: 10
-                        visible: airPodsTrayApp.airpodsConnected
-
-                        TextField {
-                            id: newNameField
-                            placeholderText: airPodsTrayApp.deviceInfo.deviceName
-                            maximumLength: 32
-                        }
-
-                        Button {
-                            text: qsTr("Rename")
-                            onClicked: airPodsTrayApp.renameAirPods(newNameField.text)
-                        }
-                    }
-
-                    Row {
-                        spacing: 10
-                        visible: airPodsTrayApp.airpodsConnected
-
-                        TextField {
-                            id: newPhoneMacField
-                            placeholderText: (PHONE_MAC_ADDRESS !== "" ? PHONE_MAC_ADDRESS : "00:00:00:00:00:00")
-                            maximumLength: 32
-                        }
-
-                        Button {
-                            text: qsTr("Change Phone MAC")
-                            onClicked: airPodsTrayApp.setPhoneMac(newPhoneMacField.text)
-                        }
-                    }
-
-                    Button {
-                        text: qsTr("Show Magic Cloud Keys QR")
-                        onClicked: keysQrDialog.show()
-                    }
-
-                    KeysQRDialog {
-                        id: keysQrDialog
-                        encKey: airPodsTrayApp.deviceInfo.magicAccEncKey
-                        irk: airPodsTrayApp.deviceInfo.magicAccIRK
-                    }
-                }
-            }
-
-            // Floating back button
-            RoundButton {
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.margins: 12
-                font.family: iconFont.name
-                font.pixelSize: 18
-                text: "\uecb1"
-                onClicked: stackView.pop()
-            }
+        SettingsPage {
+            stackView: stackView
+            iconFont: iconFont
+            keysQrDialog: keysQrDialogShared
         }
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    //  HEARING AID PAGE — Stitch redesign, loaded from HearingAidPage.qml
+    // ─────────────────────────────────────────────────────────────────
+    Component {
+        id: hearingAidPage
+        HearingAidPage {
+            stackView: stackView
+            iconFont: iconFont
+        }
+    }
+
+    // Shared dialog for the Magic Cloud Keys QR code (used by SettingsPage).
+    KeysQRDialog {
+        id: keysQrDialogShared
+        encKey: airPodsTrayApp.deviceInfo.magicAccEncKey
+        irk: airPodsTrayApp.deviceInfo.magicAccIRK
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -613,7 +495,18 @@ ApplicationWindow {
         property string subtitle: ""
         property string icon: "•"
         property bool checked: false
+        property bool cardClickable: false
         signal toggled(bool value)
+        signal cardClicked()
+
+        // Click on the card body (excluding the toggle) — used by pages.
+        MouseArea {
+            anchors.fill: parent
+            anchors.rightMargin: 70   // leave the toggle area for its own click
+            cursorShape: card.cardClickable ? Qt.PointingHandCursor : Qt.ArrowCursor
+            enabled: card.cardClickable
+            onClicked: card.cardClicked()
+        }
 
         height: 68
         radius: 22

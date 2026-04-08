@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Hearing Aid Setup - LinuxPods</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container": "#191a1a",
+                    "surface-bright": "#2c2c2c",
+                    "surface-variant": "#262626",
+                    "on-tertiary-fixed-variant": "#5f1876",
+                    "on-primary-fixed": "#000000",
+                    "primary-dim": "#589fff",
+                    "on-secondary-fixed-variant": "#00673f",
+                    "secondary": "#70f9af",
+                    "secondary-fixed-dim": "#60eaa2",
+                    "secondary-container": "#006d42",
+                    "tertiary": "#eda8ff",
+                    "on-primary-container": "#002348",
+                    "inverse-on-surface": "#565555",
+                    "on-primary": "#002e5d",
+                    "surface-container-low": "#131313",
+                    "surface-dim": "#0e0e0e",
+                    "on-error-container": "#ffa8a3",
+                    "primary": "#7bafff",
+                    "on-secondary-fixed": "#00472a",
+                    "on-surface": "#ffffff",
+                    "error": "#ff716c",
+                    "on-tertiary-container": "#550b6d",
+                    "tertiary-fixed-dim": "#d589eb",
+                    "inverse-primary": "#005fb3",
+                    "error-dim": "#d7383b",
+                    "secondary-fixed": "#70f9af",
+                    "tertiary-fixed": "#e496f9",
+                    "primary-container": "#5ea2ff",
+                    "on-surface-variant": "#adabaa",
+                    "primary-fixed": "#5ea2ff",
+                    "outline-variant": "#484848",
+                    "on-secondary": "#005c37",
+                    "on-secondary-container": "#e2ffe9",
+                    "tertiary-dim": "#d589eb",
+                    "on-background": "#ffffff",
+                    "surface-container-lowest": "#000000",
+                    "secondary-dim": "#60eaa2",
+                    "outline": "#767575",
+                    "on-primary-fixed-variant": "#002c59",
+                    "background": "#0e0e0e",
+                    "error-container": "#9f0519",
+                    "primary-fixed-dim": "#4a94f5",
+                    "surface": "#0e0e0e",
+                    "surface-tint": "#7bafff",
+                    "on-tertiary-fixed": "#320043",
+                    "surface-container-highest": "#262626",
+                    "surface-container-high": "#1f2020",
+                    "inverse-surface": "#fcf9f8",
+                    "tertiary-container": "#e496f9",
+                    "on-tertiary": "#601a77",
+                    "on-error": "#490006"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px",
+                    "3xl": "1.5rem"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background: radial-gradient(circle at center, #1a1a1a 0%, #0e0e0e 100%);
+            -webkit-tap-highlight-color: transparent;
+        }
+        .glass-card {
+            background: rgba(30, 30, 30, 0.55);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            background: #262626;
+            height: 6px;
+            border-radius: 3px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: #7bafff;
+            margin-top: -6px;
+            box-shadow: 0 0 10px rgba(123, 175, 255, 0.4);
+        }
+        .vertical-slider {
+            writing-mode: bt-lr; /* IE */
+            -webkit-appearance: slider-vertical;
+            width: 8px;
+            height: 120px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body text-on-surface selection:bg-primary-container min-h-screen pb-32">
+<!-- TopAppBar Shared Component -->
+<header class="fixed top-0 z-50 w-full h-20 px-6 flex items-center justify-between bg-[#0e0e0e]/70 backdrop-blur-2xl shadow-[0_10px_40px_rgba(0,0,0,0.4)]">
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 transition-colors active:scale-95 duration-200 ease-out">
+<span class="material-symbols-outlined text-[#7bafff]">arrow_back</span>
+</button>
+<h1 class="font-['Inter'] tracking-[0.15em] uppercase text-sm font-bold text-white">HEARING AID</h1>
+</div>
+<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant/30">
+<img alt="User Profile" data-alt="close-up portrait of a professional male user in soft minimalist studio lighting with neutral tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhFiKC9ELVATD49YGq6MdjkIeOAnLmbUWVrV-TT5JZYGFZSafVn3nmsvoaMJvNjENq0fmflJ6r2kZY3ZXGzHVzZBlu7-omsWrBCJnLZF4el70TDoqKJNQy0ZD0FYLlUyYMdZRB2a1U3UM_XwyQVRg74_d3BtapWHnU27kF0NC1ksZaH9q1y5oywa9VdKiuQYVyZn54b_jBSihIkUQYLkMmPF51BSKU9z3gSzR9GAcp9XkxQmIZoJM9DGjiEi-wJTOEgO7og_yIeZc"/>
+</div>
+</header>
+<main class="mt-24 px-4 space-y-6 max-w-lg mx-auto">
+<!-- AUDIOGRAM SECTION -->
+<section>
+<h2 class="text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold mb-3 px-2">Audiogram</h2>
+<div class="glass-card rounded-3xl p-5 space-y-4">
+<div class="grid grid-cols-[1fr_auto_auto] gap-4 mb-2 text-[10px] text-on-surface-variant uppercase font-black px-2">
+<span>Frequency</span>
+<span class="w-20 text-center">L</span>
+<span class="w-20 text-center">R</span>
+</div>
+<!-- Frequency Rows -->
+<div class="space-y-4">
+<!-- Row Generator (250Hz to 8kHz) -->
+<div class="flex items-center justify-between gap-4">
+<span class="text-xs font-medium text-on-surface/80">250 Hz</span>
+<input class="w-20 accent-primary" max="0" min="-90" type="range" value="-15"/>
+<input class="w-20 accent-primary" max="0" min="-90" type="range" value="-20"/>
+</div>
+<div class="flex items-center justify-between gap-4">
+<span class="text-xs font-medium text-on-surface/80">500 Hz</span>
+<input class="w-20 accent-primary" max="0" min="-90" type="range" value="-10"/>
+<input class="w-20 accent-primary" max="0" min="-90" type="range" value="-12"/>
+</div>
+<div class="flex items-center justify-between gap-4">
+<span class="text-xs font-medium text-on-surface/80">1 kHz</span>
+<input class="w-20 accent-primary" max="0" min="-90" type="range" value="-25"/>
+<input class="w-20 accent-primary" max="0" min="-90" type="range" value="-25"/>
+</div>
+<div class="flex items-center justify-between gap-4">
+<span class="text-xs font-medium text-on-surface/80">2 kHz</span>
+<input class="w-20 accent-primary" max="0" min="-90" type="range" value="-40"/>
+<input class="w-20 accent-primary" max="0" min="-90" type="range" value="-35"/>
+</div>
+<div class="flex items-center justify-between gap-4">
+<span class="text-xs font-medium text-on-surface/80">4 kHz</span>
+<input class="w-20 accent-primary" max="0" min="-90" type="range" value="-30"/>
+<input class="w-20 accent-primary" max="0" min="-90" type="range" value="-45"/>
+</div>
+<div class="flex items-center justify-between gap-4">
+<span class="text-xs font-medium text-on-surface/80">8 kHz</span>
+<input class="w-20 accent-primary" max="0" min="-90" type="range" value="-20"/>
+<input class="w-20 accent-primary" max="0" min="-90" type="range" value="-20"/>
+</div>
+</div>
+</div>
+</section>
+<!-- AMPLIFICATION SECTION -->
+<section>
+<h2 class="text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold mb-3 px-2">Amplification</h2>
+<div class="glass-card rounded-3xl p-6 flex items-center gap-6">
+<div class="flex-grow">
+<input class="w-full" max="100" min="0" type="range" value="65"/>
+</div>
+<div class="text-4xl font-black tracking-tighter text-primary tabular-nums">
+                    65%
+                </div>
+</div>
+</section>
+<!-- BALANCE SECTION -->
+<section>
+<h2 class="text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold mb-3 px-2">Balance</h2>
+<div class="glass-card rounded-3xl p-6 space-y-4">
+<input class="w-full" max="50" min="-50" type="range" value="0"/>
+<div class="flex justify-between text-[10px] font-black text-on-surface-variant">
+<span>-L</span>
+<span>0</span>
+<span>R+</span>
+</div>
+</div>
+</section>
+<!-- TONE SECTION (EQ) -->
+<section>
+<h2 class="text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold mb-3 px-2">Tone</h2>
+<div class="glass-card rounded-3xl p-6 grid grid-cols-4 gap-4 items-end justify-items-center h-48">
+<div class="flex flex-col items-center gap-3">
+<input class="vertical-slider" max="12" min="-12" type="range" value="4"/>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase">Bass</span>
+</div>
+<div class="flex flex-col items-center gap-3">
+<input class="vertical-slider" max="12" min="-12" type="range" value="-2"/>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase">Low-Mid</span>
+</div>
+<div class="flex flex-col items-center gap-3">
+<input class="vertical-slider" max="12" min="-12" type="range" value="2"/>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase">High-Mid</span>
+</div>
+<div class="flex flex-col items-center gap-3">
+<input class="vertical-slider" max="12" min="-12" type="range" value="6"/>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase">Treble</span>
+</div>
+</div>
+</section>
+<!-- AMBIENT SECTION -->
+<section>
+<h2 class="text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold mb-3 px-2">Ambient</h2>
+<div class="glass-card rounded-3xl p-2 space-y-1">
+<!-- Toggle Item -->
+<div class="flex items-center justify-between p-4 rounded-2xl hover:bg-white/5 transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-11 h-11 bg-surface-container-highest rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">filter_alt</span>
+</div>
+<span class="text-sm font-semibold">Ambient Noise Reduction</span>
+</div>
+<div class="w-12 h-6 bg-primary rounded-full relative flex items-center px-1">
+<div class="w-4 h-4 bg-on-primary rounded-full ml-auto"></div>
+</div>
+</div>
+<!-- Toggle Item -->
+<div class="flex items-center justify-between p-4 rounded-2xl hover:bg-white/5 transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-11 h-11 bg-surface-container-highest rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">record_voice_over</span>
+</div>
+<span class="text-sm font-semibold">Conversation Boost</span>
+</div>
+<div class="w-12 h-6 bg-surface-container-highest rounded-full relative flex items-center px-1">
+<div class="w-4 h-4 bg-on-surface-variant rounded-full"></div>
+</div>
+</div>
+<!-- Slider Item -->
+<div class="p-4 space-y-3">
+<div class="flex items-center gap-4">
+<div class="w-11 h-11 bg-surface-container-highest rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">hearing</span>
+</div>
+<span class="text-sm font-semibold">Own Voice Amplification</span>
+</div>
+<input class="w-full" max="100" min="0" type="range" value="30"/>
+</div>
+</div>
+</section>
+</main>
+<!-- FOOTER ACTIONS -->
+<footer class="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-background via-background/90 to-transparent flex flex-col gap-3">
+<button class="w-full bg-primary hover:bg-primary-container text-on-primary-container font-black py-4 rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-primary/20">
+            SAVE PROFILE
+        </button>
+<button class="w-full bg-transparent hover:bg-white/5 text-on-surface-variant font-bold py-3 rounded-xl transition-colors">
+            RESET
+        </button>
+</footer>
+</body></html>
