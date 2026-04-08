@@ -79,7 +79,7 @@ Control {
                     horizontalAlignment: Text.AlignHCenter
                     color: segmentRoot.isActive ? root.activeTextColor : root.inactiveTextColor
                     font.family: "Inter"
-                    font.pixelSize: 10
+                    font.pixelSize: 9
                     font.bold: true
                     font.letterSpacing: 0.6
                     elide: Text.ElideRight

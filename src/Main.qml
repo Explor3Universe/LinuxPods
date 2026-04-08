@@ -21,10 +21,10 @@ import QtQuick.Effects
 ApplicationWindow {
     id: mainWindow
     visible: !airPodsTrayApp.hideOnStart
-    width: 480
-    height: 920
-    minimumWidth: 440
-    minimumHeight: 660
+    width: 500
+    height: 1040
+    minimumWidth: 460
+    minimumHeight: 700
     title: "LinuxPods"
     objectName: "mainWindowObject"
     color: "transparent"
@@ -94,7 +94,7 @@ ApplicationWindow {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 height: 64
-                color: Qt.rgba(0, 0, 0, 0.55)
+                color: Qt.rgba(0, 0, 0, 0.40)
                 z: 100
 
                 Rectangle {
@@ -143,9 +143,9 @@ ApplicationWindow {
                             : "AIRPODS PRO"
                         color: Qt.rgba(1, 1, 1, 0.92)
                         font.family: "Inter"
-                        font.pixelSize: 13
+                        font.pixelSize: 16
                         font.bold: true
-                        font.letterSpacing: 2.2
+                        font.letterSpacing: 2.0
                     }
                 }
 
@@ -213,43 +213,42 @@ ApplicationWindow {
                     }
 
                     // ── Hero: big device image with primary blur glow ──
+                    // Stitch reference: image w-64 (256px) + bg-primary/20
+                    // blur(80px) scale-125 (≈ 320px halo)
                     Item {
                         Layout.fillWidth: true
-                        Layout.topMargin: 0
-                        Layout.preferredHeight: 200
+                        Layout.topMargin: 16
+                        Layout.preferredHeight: 280
 
-                        // Source circle for the blur — invisible itself,
-                        // serves only as input to MultiEffect.
                         Rectangle {
                             id: heroGlowSource
                             anchors.centerIn: parent
-                            width: 160
-                            height: 160
+                            width: 220
+                            height: 220
                             radius: width / 2
                             color: "#3584e4"
                             visible: false
                             layer.enabled: true
                         }
 
-                        // Real Gaussian blur — equivalent of CSS blur(80px)
                         MultiEffect {
                             anchors.centerIn: parent
-                            width: 320
-                            height: 320
+                            width: 420
+                            height: 420
                             source: heroGlowSource
                             blurEnabled: true
                             blur: 1.0
-                            blurMax: 96
-                            blurMultiplier: 1.4
-                            opacity: 0.55
+                            blurMax: 128
+                            blurMultiplier: 1.6
+                            opacity: 0.20
                             autoPaddingEnabled: true
                         }
 
                         Image {
                             anchors.centerIn: parent
                             source: "qrc:/icons/assets/airpods.png"
-                            width: 160
-                            height: 160
+                            width: 240
+                            height: 240
                             fillMode: Image.PreserveAspectFit
                             mipmap: true
                             smooth: true
@@ -267,7 +266,7 @@ ApplicationWindow {
                         Row {
                             id: heroRow
                             anchors.horizontalCenter: parent.horizontalCenter
-                            spacing: 28
+                            spacing: 40
 
                             PodColumn {
                                 visible: airPodsTrayApp.deviceInfo.battery.leftPodAvailable
@@ -315,9 +314,9 @@ ApplicationWindow {
                         text: qsTr("NOISE CONTROL")
                         color: "#9a9996"
                         font.family: "Inter"
-                        font.pixelSize: 10
+                        font.pixelSize: 11
                         font.bold: true
-                        font.letterSpacing: 1.8
+                        font.letterSpacing: 2.75
                         visible: airPodsTrayApp.airpodsConnected
                     }
 
@@ -372,9 +371,9 @@ ApplicationWindow {
                         text: qsTr("FEATURES")
                         color: "#9a9996"
                         font.family: "Inter"
-                        font.pixelSize: 10
+                        font.pixelSize: 11
                         font.bold: true
-                        font.letterSpacing: 1.8
+                        font.letterSpacing: 2.75
                         visible: airPodsTrayApp.airpodsConnected
                     }
 
@@ -421,20 +420,20 @@ ApplicationWindow {
                         onToggled: (v) => airPodsTrayApp.setHearingAidEnabled(v)
                     }
 
-                    // ── Status footer card (mesh-gradient look) ─────
+                    // ── Status footer card (Stitch h-36 = 144px) ────
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.leftMargin: 22
                         Layout.rightMargin: 22
                         Layout.topMargin: 6
-                        Layout.preferredHeight: 110
+                        Layout.preferredHeight: 144
                         radius: 24
                         color: "#0e0e0e"
                         border.width: 1
                         border.color: Qt.rgba(1, 1, 1, 0.06)
                         visible: airPodsTrayApp.airpodsConnected
 
-                        // Faux mesh gradient via two radial-ish overlays.
+                        // Faux mesh gradient via horizontal overlay (blue → faint red)
                         Rectangle {
                             anchors.fill: parent
                             radius: parent.radius
@@ -448,7 +447,7 @@ ApplicationWindow {
                         ColumnLayout {
                             anchors.left: parent.left
                             anchors.verticalCenter: parent.verticalCenter
-                            anchors.leftMargin: 26
+                            anchors.leftMargin: 32
                             spacing: 4
 
                             Text {
@@ -457,32 +456,32 @@ ApplicationWindow {
                                 font.family: "Inter"
                                 font.pixelSize: 9
                                 font.bold: true
-                                font.letterSpacing: 2.4
+                                font.letterSpacing: 2.7
                             }
                             Text {
                                 text: qsTr("System Optimal")
                                 color: "#ffffff"
                                 font.family: "Inter"
-                                font.pixelSize: 18
+                                font.pixelSize: 20
                                 font.bold: true
                             }
                             Text {
                                 text: qsTr("LinuxPods 0.1.0 • AAP active")
                                 color: "#9a9996"
                                 font.family: "Inter"
-                                font.pixelSize: 10
+                                font.pixelSize: 11
                             }
                         }
 
-                        // Big translucent verified glyph (uses bundled SF Symbols font).
+                        // Big translucent verified glyph (Stitch text-7xl = 56px)
                         Text {
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
-                            anchors.rightMargin: 24
+                            anchors.rightMargin: 32
                             text: "\u2713"
                             color: Qt.rgba(1, 1, 1, 0.10)
                             font.family: "Inter"
-                            font.pixelSize: 64
+                            font.pixelSize: 56
                             font.bold: true
                         }
                     }
@@ -540,40 +539,41 @@ ApplicationWindow {
         signal toggled(bool value)
         signal cardClicked()
 
-        // Click on the card body (excluding the toggle) — used by pages.
+        // Click on the card body (excluding the toggle).
         MouseArea {
             anchors.fill: parent
-            anchors.rightMargin: 70   // leave the toggle area for its own click
+            anchors.rightMargin: 70
             cursorShape: card.cardClickable ? Qt.PointingHandCursor : Qt.ArrowCursor
             enabled: card.cardClickable
             onClicked: card.cardClicked()
         }
 
-        height: 68
-        radius: 22
+        // Stitch: rounded-3xl (24), p-5 (20px padding), space-y-3 between cards
+        height: 80
+        radius: 24
         color: Qt.rgba(30 / 255, 30 / 255, 30 / 255, 0.55)
         border.width: 1
         border.color: Qt.rgba(1, 1, 1, 0.06)
 
         RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: 18
-            anchors.rightMargin: 18
-            spacing: 14
+            anchors.leftMargin: 20
+            anchors.rightMargin: 20
+            spacing: 20
 
-            // Icon tile
+            // Icon tile (Stitch w-12 h-12 = 48x48, rounded-2xl = 16)
             Rectangle {
-                Layout.preferredWidth: 44
-                Layout.preferredHeight: 44
-                radius: 14
-                color: Qt.rgba(1, 1, 1, 0.04)
+                Layout.preferredWidth: 48
+                Layout.preferredHeight: 48
+                radius: 16
+                color: Qt.rgba(1, 1, 1, 0.05)
                 border.width: 1
                 border.color: Qt.rgba(1, 1, 1, 0.05)
 
                 Text {
                     anchors.centerIn: parent
                     text: card.icon
-                    font.pixelSize: 22
+                    font.pixelSize: 24
                     color: "#7bafff"
                 }
             }
@@ -587,7 +587,7 @@ ApplicationWindow {
                     text: card.title
                     color: "#ffffff"
                     font.family: "Inter"
-                    font.pixelSize: 13
+                    font.pixelSize: 14
                     font.weight: Font.DemiBold
                     elide: Text.ElideRight
                     Layout.fillWidth: true
@@ -602,12 +602,12 @@ ApplicationWindow {
                 }
             }
 
-            // Custom toggle (Stitch style)
+            // Custom toggle (Stitch w-12 h-7 = 48x28, knob 20x20)
             Rectangle {
                 id: toggleTrack
-                Layout.preferredWidth: 46
-                Layout.preferredHeight: 26
-                radius: 13
+                Layout.preferredWidth: 48
+                Layout.preferredHeight: 28
+                radius: 14
                 color: card.checked
                     ? "#3584e4"
                     : Qt.rgba(1, 1, 1, 0.1)
@@ -623,7 +623,7 @@ ApplicationWindow {
                     radius: 10
                     color: "#ffffff"
                     anchors.verticalCenter: parent.verticalCenter
-                    x: card.checked ? parent.width - width - 3 : 3
+                    x: card.checked ? parent.width - width - 4 : 4
 
                     Behavior on x {
                         NumberAnimation { duration: 200; easing.type: Easing.OutCubic }

@@ -28,14 +28,14 @@ Item {
     readonly property color inputBg: "#131313"
     readonly property color iconTileBg: "#262626"
 
-    // Top app bar (fixed-height strip at the top)
+    // Top app bar — Stitch h-16 (64px) bg #131313/80 backdrop-blur
     Rectangle {
         id: appBar
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        height: 60
-        color: Qt.rgba(19 / 255, 19 / 255, 19 / 255, 0.85)
+        height: 64
+        color: Qt.rgba(19 / 255, 19 / 255, 19 / 255, 0.50)
 
         Rectangle {
             anchors.bottom: parent.bottom
@@ -73,15 +73,15 @@ Item {
             }
         }
 
-        // Title centered
+        // Title centered (Stitch text-base = 16px tracking-widest)
         Text {
             anchors.centerIn: parent
             text: "SETTINGS"
             color: settingsRoot.onSurface
             font.family: "Inter"
-            font.pixelSize: 13
-            font.bold: true
-            font.letterSpacing: 2.4
+            font.pixelSize: 16
+            font.weight: Font.DemiBold
+            font.letterSpacing: 2.0
         }
     }
 

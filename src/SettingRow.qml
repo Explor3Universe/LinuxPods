@@ -22,9 +22,12 @@ Item {
     signal toggleClicked()
     signal rowClicked()
 
-    implicitHeight: sublabel === "" ? 64 : 72
+    // Explicit Layout sizing (binding implicitHeight → Layout.preferredHeight
+    // races with the inner RowLayout sizing pass and collapses the row).
     Layout.fillWidth: true
-    Layout.preferredHeight: implicitHeight
+    Layout.preferredHeight: sublabel === "" ? 64 : 72
+    implicitHeight: sublabel === "" ? 64 : 72
+    implicitWidth: 320
 
     // Whole-row click area (used when type === "chevron" or clickable === true)
     MouseArea {
