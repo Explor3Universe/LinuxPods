@@ -21,13 +21,71 @@ import QtQuick.Effects
 ApplicationWindow {
     id: mainWindow
     visible: !airPodsTrayApp.hideOnStart
-    width: 500
-    height: 1040
-    minimumWidth: 460
-    minimumHeight: 700
+    width: 380
+    height: 620
+    minimumWidth: 360
+    minimumHeight: 540
+    maximumWidth: 440
+    maximumHeight: 720
     title: "LinuxPods"
     objectName: "mainWindowObject"
     color: "transparent"
+
+    // Frameless dropdown / "shutter from the top panel" behaviour.
+    // No Qt.Tool — that flag blocks focus on Wayland/X11, which kills both
+    // requestActivate() and the auto-hide-on-focus-lost logic.
+    flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
+
+    property bool _hadFocus: false
+    property bool _autoHide: Qt.application.arguments.indexOf("--no-autohide") === -1
+    property int _targetY: 40
+    property real _slideOffset: 0   // animated offset, 0 = parked
+
+    // Animated slide-down: window y = _targetY - _slideOffset.
+    // _slideOffset starts at +height (above the screen) and animates to 0.
+    y: _targetY - _slideOffset
+    opacity: _slideOffset === 0 ? 1.0 : Math.max(0.0, 1.0 - _slideOffset / 60)
+
+    Behavior on _slideOffset {
+        NumberAnimation { duration: 260; easing.type: Easing.OutCubic }
+    }
+
+    function showFromTopPanel() {
+        const screen = Qt.application.primaryScreen || Qt.application.screens[0];
+        if (screen) {
+            mainWindow.x = screen.virtualX + screen.width - mainWindow.width - 16;
+            mainWindow._targetY = screen.virtualY + 40;
+        }
+        // Park above the screen first, then animate down
+        mainWindow._slideOffset = mainWindow.height + 60;
+        mainWindow.visible = true;
+        Qt.callLater(() => {
+            mainWindow.raise();
+            mainWindow.requestActivate();
+            mainWindow._slideOffset = 0;   // animate down
+        });
+    }
+
+    Component.onCompleted: {
+        showFromTopPanel();
+    }
+
+    // Auto-hide when the popup loses focus (skipped with --no-autohide).
+    onActiveChanged: {
+        if (active) {
+            _hadFocus = true;
+        } else if (_autoHide && _hadFocus && visible) {
+            // Animate out, then hide.
+            mainWindow._slideOffset = mainWindow.height + 60;
+            hideTimer.start();
+        }
+    }
+
+    Timer {
+        id: hideTimer
+        interval: 300
+        onTriggered: mainWindow.visible = false
+    }
 
     // ── Stitch dark gradient background ───────────────────────────────
     background: Rectangle {
@@ -72,6 +130,17 @@ ApplicationWindow {
         id: stackView
         anchors.fill: parent
         initialItem: mainPage
+
+        // Allow opening directly on a sub-page from the CLI:
+        //   librepods --settings    or    librepods --hearing
+        Component.onCompleted: {
+            const args = Qt.application.arguments;
+            if (args.indexOf("--settings") !== -1) {
+                stackView.push(settingsPage);
+            } else if (args.indexOf("--hearing") !== -1) {
+                stackView.push(hearingAidPage);
+            }
+        }
     }
 
     FontLoader {
@@ -86,14 +155,13 @@ ApplicationWindow {
         id: mainPage
         Item {
 
-            // ── Fixed Top App Bar (Stitch reference) ─────────────────
-            // bg-black/40 + backdrop-blur + border-b border-white/5
+            // ── Compact Top Strip (dropdown popup style) ─────────────
             Rectangle {
                 id: topBar
                 anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.right: parent.right
-                height: 64
+                height: 44
                 color: Qt.rgba(0, 0, 0, 0.40)
                 z: 100
 
@@ -105,65 +173,34 @@ ApplicationWindow {
                     color: Qt.rgba(1, 1, 1, 0.05)
                 }
 
-                // Left: hamburger menu icon + title
-                Row {
+                // Left: device name (compact, no hamburger)
+                Text {
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    anchors.leftMargin: 22
-                    spacing: 14
-
-                    Rectangle {
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: 36
-                        height: 36
-                        radius: 18
-                        color: menuHover.containsMouse ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
-
-                        // Hamburger glyph (3 horizontal bars) drawn as 3 rectangles
-                        Column {
-                            anchors.centerIn: parent
-                            spacing: 4
-                            Rectangle { width: 16; height: 2; radius: 1; color: Qt.rgba(1, 1, 1, 0.85) }
-                            Rectangle { width: 16; height: 2; radius: 1; color: Qt.rgba(1, 1, 1, 0.85) }
-                            Rectangle { width: 16; height: 2; radius: 1; color: Qt.rgba(1, 1, 1, 0.85) }
-                        }
-
-                        MouseArea {
-                            id: menuHover
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                        }
-                    }
-
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: airPodsTrayApp.deviceInfo.deviceName
-                            ? airPodsTrayApp.deviceInfo.deviceName.toUpperCase()
-                            : "AIRPODS PRO"
-                        color: Qt.rgba(1, 1, 1, 0.92)
-                        font.family: "Inter"
-                        font.pixelSize: 16
-                        font.bold: true
-                        font.letterSpacing: 2.0
-                    }
+                    anchors.leftMargin: 16
+                    text: airPodsTrayApp.deviceInfo.deviceName || "AirPods Pro"
+                    color: Qt.rgba(1, 1, 1, 0.92)
+                    font.family: "Inter"
+                    font.pixelSize: 13
+                    font.weight: Font.DemiBold
+                    font.letterSpacing: 0.3
                 }
 
                 // Right: settings gear
                 Rectangle {
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
-                    anchors.rightMargin: 22
-                    width: 36
-                    height: 36
-                    radius: 18
+                    anchors.rightMargin: 12
+                    width: 30
+                    height: 30
+                    radius: 15
                     color: settingsHover.containsMouse ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
 
                     Text {
                         anchors.centerIn: parent
                         text: "\uf958"
                         font.family: iconFont.name
-                        font.pixelSize: 16
+                        font.pixelSize: 14
                         color: Qt.rgba(1, 1, 1, 0.75)
                     }
 
@@ -212,19 +249,17 @@ ApplicationWindow {
                         }
                     }
 
-                    // ── Hero: big device image with primary blur glow ──
-                    // Stitch reference: image w-64 (256px) + bg-primary/20
-                    // blur(80px) scale-125 (≈ 320px halo)
+                    // ── Compact hero ─────────────────────────────────
                     Item {
                         Layout.fillWidth: true
-                        Layout.topMargin: 16
-                        Layout.preferredHeight: 280
+                        Layout.topMargin: 6
+                        Layout.preferredHeight: 130
 
                         Rectangle {
                             id: heroGlowSource
                             anchors.centerIn: parent
-                            width: 220
-                            height: 220
+                            width: 110
+                            height: 110
                             radius: width / 2
                             color: "#3584e4"
                             visible: false
@@ -233,40 +268,38 @@ ApplicationWindow {
 
                         MultiEffect {
                             anchors.centerIn: parent
-                            width: 420
-                            height: 420
+                            width: 220
+                            height: 220
                             source: heroGlowSource
                             blurEnabled: true
                             blur: 1.0
-                            blurMax: 128
-                            blurMultiplier: 1.6
-                            opacity: 0.20
+                            blurMax: 96
+                            blurMultiplier: 1.4
+                            opacity: 0.18
                             autoPaddingEnabled: true
                         }
 
                         Image {
                             anchors.centerIn: parent
                             source: "qrc:/icons/assets/airpods.png"
-                            width: 240
-                            height: 240
+                            width: 120
+                            height: 120
                             fillMode: Image.PreserveAspectFit
                             mipmap: true
                             smooth: true
                         }
                     }
 
-                    // ── Battery ring grid: 3 columns (L · Case · R) ──
-                    // Headset shown only as a fallback when neither L nor R is available
-                    // (covers e.g. AirPods Max).
+                    // ── Battery ring grid: 3 columns ─────────────────
                     Item {
                         Layout.fillWidth: true
-                        Layout.topMargin: 6
-                        Layout.preferredHeight: heroRow.implicitHeight + 12
+                        Layout.topMargin: 0
+                        Layout.preferredHeight: heroRow.implicitHeight + 6
 
                         Row {
                             id: heroRow
                             anchors.horizontalCenter: parent.horizontalCenter
-                            spacing: 40
+                            spacing: 24
 
                             PodColumn {
                                 visible: airPodsTrayApp.deviceInfo.battery.leftPodAvailable
@@ -309,38 +342,42 @@ ApplicationWindow {
 
                     // ── Section: NOISE CONTROL ───────────────────────
                     Text {
-                        Layout.leftMargin: 26
-                        Layout.topMargin: 8
+                        Layout.leftMargin: 18
+                        Layout.topMargin: 4
                         text: qsTr("NOISE CONTROL")
                         color: "#9a9996"
                         font.family: "Inter"
-                        font.pixelSize: 11
+                        font.pixelSize: 9
                         font.bold: true
-                        font.letterSpacing: 2.75
+                        font.letterSpacing: 2.0
                         visible: airPodsTrayApp.airpodsConnected
                     }
 
                     SegmentedControl {
                         Layout.fillWidth: true
-                        Layout.leftMargin: 22
-                        Layout.rightMargin: 22
+                        Layout.leftMargin: 14
+                        Layout.rightMargin: 14
+                        Layout.preferredHeight: 36
                         model: [qsTr("Off"), qsTr("Transp."), qsTr("Adaptive"), qsTr("ANC")]
                         currentIndex: airPodsTrayApp.deviceInfo.noiseControlMode
                         onCurrentIndexChanged: airPodsTrayApp.setNoiseControlModeInt(currentIndex)
                         visible: airPodsTrayApp.airpodsConnected
                     }
 
-                    // Adaptive noise level slider
+                    // Adaptive noise level slider — only when actually in Adaptive mode (idx 3).
                     ColumnLayout {
                         Layout.fillWidth: true
-                        Layout.leftMargin: 22
-                        Layout.rightMargin: 22
+                        Layout.leftMargin: 14
+                        Layout.rightMargin: 14
                         spacing: 4
-                        visible: airPodsTrayApp.deviceInfo.adaptiveModeActive
+                        visible: airPodsTrayApp.airpodsConnected
+                            && airPodsTrayApp.deviceInfo.adaptiveModeActive
+                            && airPodsTrayApp.deviceInfo.noiseControlMode === 3
 
                         Slider {
                             id: adaptiveSlider
                             Layout.fillWidth: true
+                            Layout.preferredHeight: 18
                             from: 0
                             to: 100
                             stepSize: 1
@@ -355,33 +392,26 @@ ApplicationWindow {
                             onPressedChanged: if (!pressed) airPodsTrayApp.setAdaptiveNoiseLevel(value)
                             onValueChanged: if (pressed) debounceTimer.restart()
                         }
-
-                        Text {
-                            text: qsTr("Adaptive level: ") + Math.round(adaptiveSlider.value) + "%"
-                            color: "#9a9996"
-                            font.family: "Inter"
-                            font.pixelSize: 11
-                        }
                     }
 
                     // ── Section: FEATURES ────────────────────────────
                     Text {
-                        Layout.leftMargin: 26
-                        Layout.topMargin: 8
+                        Layout.leftMargin: 18
+                        Layout.topMargin: 4
                         text: qsTr("FEATURES")
                         color: "#9a9996"
                         font.family: "Inter"
-                        font.pixelSize: 11
+                        font.pixelSize: 9
                         font.bold: true
-                        font.letterSpacing: 2.75
+                        font.letterSpacing: 2.0
                         visible: airPodsTrayApp.airpodsConnected
                     }
 
                     // Feature card: Conversational Awareness
                     FeatureCard {
                         Layout.fillWidth: true
-                        Layout.leftMargin: 22
-                        Layout.rightMargin: 22
+                        Layout.leftMargin: 14
+                        Layout.rightMargin: 14
                         title: qsTr("Conversational Awareness")
                         subtitle: qsTr("Lowers media when you speak")
                         icon: "\u2B25"
@@ -390,26 +420,11 @@ ApplicationWindow {
                         onToggled: (v) => airPodsTrayApp.setConversationalAwareness(v)
                     }
 
-                    // Feature card: Spatial Audio (placeholder; not yet wired to backend)
-                    FeatureCard {
-                        Layout.fillWidth: true
-                        Layout.leftMargin: 22
-                        Layout.rightMargin: 22
-                        title: qsTr("Spatial Audio")
-                        subtitle: qsTr("Immersive surround sound")
-                        icon: "\u25C9"
-                        checked: false
-                        enabled: false
-                        opacity: 0.55
-                        visible: airPodsTrayApp.airpodsConnected
-                        onToggled: (v) => {}
-                    }
-
                     // Feature card: Hearing Aid (clickable — opens dedicated page)
                     FeatureCard {
                         Layout.fillWidth: true
-                        Layout.leftMargin: 22
-                        Layout.rightMargin: 22
+                        Layout.leftMargin: 14
+                        Layout.rightMargin: 14
                         title: qsTr("Hearing Aid Mode")
                         subtitle: qsTr("Tap to configure profile")
                         icon: "\u266B"
@@ -420,76 +435,10 @@ ApplicationWindow {
                         onToggled: (v) => airPodsTrayApp.setHearingAidEnabled(v)
                     }
 
-                    // ── Status footer card (Stitch h-36 = 144px) ────
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.leftMargin: 22
-                        Layout.rightMargin: 22
-                        Layout.topMargin: 6
-                        Layout.preferredHeight: 144
-                        radius: 24
-                        color: "#0e0e0e"
-                        border.width: 1
-                        border.color: Qt.rgba(1, 1, 1, 0.06)
-                        visible: airPodsTrayApp.airpodsConnected
-
-                        // Faux mesh gradient via horizontal overlay (blue → faint red)
-                        Rectangle {
-                            anchors.fill: parent
-                            radius: parent.radius
-                            gradient: Gradient {
-                                orientation: Gradient.Horizontal
-                                GradientStop { position: 0.0; color: Qt.rgba(53/255, 132/255, 228/255, 0.10) }
-                                GradientStop { position: 1.0; color: Qt.rgba(224/255, 27/255, 36/255, 0.04) }
-                            }
-                        }
-
-                        ColumnLayout {
-                            anchors.left: parent.left
-                            anchors.verticalCenter: parent.verticalCenter
-                            anchors.leftMargin: 32
-                            spacing: 4
-
-                            Text {
-                                text: qsTr("STATUS")
-                                color: "#7bafff"
-                                font.family: "Inter"
-                                font.pixelSize: 9
-                                font.bold: true
-                                font.letterSpacing: 2.7
-                            }
-                            Text {
-                                text: qsTr("System Optimal")
-                                color: "#ffffff"
-                                font.family: "Inter"
-                                font.pixelSize: 20
-                                font.bold: true
-                            }
-                            Text {
-                                text: qsTr("LinuxPods 0.1.0 • AAP active")
-                                color: "#9a9996"
-                                font.family: "Inter"
-                                font.pixelSize: 11
-                            }
-                        }
-
-                        // Big translucent verified glyph (Stitch text-7xl = 56px)
-                        Text {
-                            anchors.right: parent.right
-                            anchors.verticalCenter: parent.verticalCenter
-                            anchors.rightMargin: 32
-                            text: "\u2713"
-                            color: Qt.rgba(1, 1, 1, 0.10)
-                            font.family: "Inter"
-                            font.pixelSize: 56
-                            font.bold: true
-                        }
-                    }
-
                     // Bottom spacer
                     Item {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 22
+                        Layout.preferredHeight: 12
                     }
                 }
             }
@@ -539,33 +488,31 @@ ApplicationWindow {
         signal toggled(bool value)
         signal cardClicked()
 
-        // Click on the card body (excluding the toggle).
         MouseArea {
             anchors.fill: parent
-            anchors.rightMargin: 70
+            anchors.rightMargin: 60
             cursorShape: card.cardClickable ? Qt.PointingHandCursor : Qt.ArrowCursor
             enabled: card.cardClickable
             onClicked: card.cardClicked()
         }
 
-        // Stitch: rounded-3xl (24), p-5 (20px padding), space-y-3 between cards
-        height: 80
-        radius: 24
+        // Compact card for popup dropdown
+        height: 56
+        radius: 16
         color: Qt.rgba(30 / 255, 30 / 255, 30 / 255, 0.55)
         border.width: 1
         border.color: Qt.rgba(1, 1, 1, 0.06)
 
         RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: 20
-            anchors.rightMargin: 20
-            spacing: 20
+            anchors.leftMargin: 14
+            anchors.rightMargin: 14
+            spacing: 12
 
-            // Icon tile (Stitch w-12 h-12 = 48x48, rounded-2xl = 16)
             Rectangle {
-                Layout.preferredWidth: 48
-                Layout.preferredHeight: 48
-                radius: 16
+                Layout.preferredWidth: 36
+                Layout.preferredHeight: 36
+                radius: 12
                 color: Qt.rgba(1, 1, 1, 0.05)
                 border.width: 1
                 border.color: Qt.rgba(1, 1, 1, 0.05)
@@ -573,21 +520,20 @@ ApplicationWindow {
                 Text {
                     anchors.centerIn: parent
                     text: card.icon
-                    font.pixelSize: 24
+                    font.pixelSize: 18
                     color: "#7bafff"
                 }
             }
 
-            // Title + subtitle
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: 2
+                spacing: 1
 
                 Text {
                     text: card.title
                     color: "#ffffff"
                     font.family: "Inter"
-                    font.pixelSize: 14
+                    font.pixelSize: 12
                     font.weight: Font.DemiBold
                     elide: Text.ElideRight
                     Layout.fillWidth: true
@@ -596,18 +542,17 @@ ApplicationWindow {
                     text: card.subtitle
                     color: "#9a9996"
                     font.family: "Inter"
-                    font.pixelSize: 11
+                    font.pixelSize: 10
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                 }
             }
 
-            // Custom toggle (Stitch w-12 h-7 = 48x28, knob 20x20)
             Rectangle {
                 id: toggleTrack
-                Layout.preferredWidth: 48
-                Layout.preferredHeight: 28
-                radius: 14
+                Layout.preferredWidth: 38
+                Layout.preferredHeight: 22
+                radius: 11
                 color: card.checked
                     ? "#3584e4"
                     : Qt.rgba(1, 1, 1, 0.1)
@@ -618,12 +563,12 @@ ApplicationWindow {
 
                 Rectangle {
                     id: toggleKnob
-                    width: 20
-                    height: 20
-                    radius: 10
+                    width: 16
+                    height: 16
+                    radius: 8
                     color: "#ffffff"
                     anchors.verticalCenter: parent.verticalCenter
-                    x: card.checked ? parent.width - width - 4 : 4
+                    x: card.checked ? parent.width - width - 3 : 3
 
                     Behavior on x {
                         NumberAnimation { duration: 200; easing.type: Easing.OutCubic }

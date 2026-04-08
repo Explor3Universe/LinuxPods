@@ -22,13 +22,13 @@ Column {
     onInEarChanged: root.opacity = root.targetOpacity
     Component.onCompleted: root.opacity = root.targetOpacity
 
-    spacing: 12
+    spacing: 6
 
-    // Ring + image stack
+    // Ring + image stack — compact for dropdown popup
     Item {
         anchors.horizontalCenter: parent.horizontalCenter
-        width: 96
-        height: 96
+        width: 64
+        height: 64
 
         BatteryIndicator {
             anchors.fill: parent
@@ -40,8 +40,7 @@ Column {
         Image {
             anchors.centerIn: parent
             source: root.iconSource
-            // Stitch reference: w-12 (48px) for pods, w-14 (56px) for case.
-            width: root.indicator === "" ? 56 : 48
+            width: root.indicator === "" ? 38 : 32
             height: width
             fillMode: Image.PreserveAspectFit
             mipmap: true
@@ -59,12 +58,12 @@ Column {
         }
         color: "#9a9996"
         font.family: "Inter"
-        font.pixelSize: 10
+        font.pixelSize: 8
         font.bold: true
-        font.letterSpacing: 2.0
+        font.letterSpacing: 1.4
     }
 
-    // Battery percentage — large with smaller "%" sign
+    // Battery percentage
     Row {
         anchors.horizontalCenter: parent.horizontalCenter
         spacing: 1
@@ -73,16 +72,16 @@ Column {
             text: root.batteryLevel
             color: "#ffffff"
             font.family: "Inter"
-            font.pixelSize: 24
+            font.pixelSize: 16
             font.weight: Font.Black
         }
         Text {
             text: "%"
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 4
+            anchors.bottomMargin: 2
             color: Qt.rgba(1, 1, 1, 0.55)
             font.family: "Inter"
-            font.pixelSize: 14
+            font.pixelSize: 10
             font.weight: Font.Bold
         }
     }

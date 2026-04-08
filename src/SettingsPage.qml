@@ -184,13 +184,17 @@ Item {
 
                 Rectangle {
                     Layout.fillWidth: true
+                    Layout.preferredHeight: generalCol.implicitHeight
                     radius: 24
                     color: settingsRoot.glassColor
                     border.width: 1
                     border.color: settingsRoot.glassBorder
 
                     ColumnLayout {
-                        anchors.fill: parent
+                        id: generalCol
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
                         spacing: 0
 
                         SettingRow {
@@ -241,17 +245,20 @@ Item {
 
                 Rectangle {
                     Layout.fillWidth: true
+                    Layout.preferredHeight: earCol.implicitHeight + 30
                     radius: 24
                     color: settingsRoot.glassColor
                     border.width: 1
                     border.color: settingsRoot.glassBorder
 
                     ColumnLayout {
-                        anchors.fill: parent
+                        id: earCol
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
                         anchors.leftMargin: 18
                         anchors.rightMargin: 18
                         anchors.topMargin: 16
-                        anchors.bottomMargin: 14
                         spacing: 14
 
                         // Pause behavior — icon row + segmented control
@@ -324,17 +331,20 @@ Item {
 
                 Rectangle {
                     Layout.fillWidth: true
+                    Layout.preferredHeight: connCol.implicitHeight + 32
                     radius: 24
                     color: settingsRoot.glassColor
                     border.width: 1
                     border.color: settingsRoot.glassBorder
 
                     ColumnLayout {
-                        anchors.fill: parent
+                        id: connCol
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
                         anchors.leftMargin: 18
                         anchors.rightMargin: 18
                         anchors.topMargin: 16
-                        anchors.bottomMargin: 16
                         spacing: 16
 
                         // Retry attempts row
@@ -558,23 +568,23 @@ Item {
                     leftPadding: 6
                 }
 
-                SettingRow {
+                Rectangle {
                     Layout.fillWidth: true
-                    label: qsTr("Magic Cloud Keys QR")
-                    sublabel: qsTr("Sync cross-platform identifiers")
-                    iconText: "\u29C9"
-                    iconColor: "#eda8ff"
-                    type: "chevron"
-                    onRowClicked: if (settingsRoot.keysQrDialog) settingsRoot.keysQrDialog.show()
+                    Layout.preferredHeight: 80
+                    radius: 24
+                    color: settingsRoot.glassColor
+                    border.width: 1
+                    border.color: settingsRoot.glassBorder
 
-                    // Wrap in glass card visually
-                    Rectangle {
+                    SettingRow {
                         anchors.fill: parent
-                        z: -1
-                        radius: 24
-                        color: settingsRoot.glassColor
-                        border.width: 1
-                        border.color: settingsRoot.glassBorder
+                        label: qsTr("Magic Cloud Keys QR")
+                        sublabel: qsTr("Sync cross-platform identifiers")
+                        iconText: "\u29C9"
+                        iconColor: "#eda8ff"
+                        type: "chevron"
+                        clickable: true
+                        onRowClicked: if (settingsRoot.keysQrDialog) settingsRoot.keysQrDialog.show()
                     }
                 }
             }

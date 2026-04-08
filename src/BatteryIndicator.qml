@@ -17,7 +17,7 @@ Item {
     property color chargingColor: "#5edb8a"
     property color lowColor: "#ff716c"
     property color trackColor: Qt.rgba(1, 1, 1, 0.07)
-    property real ringWidth: 5
+    property real ringWidth: 4
 
     // Effective ring colour: low → red, charging → green, otherwise primary.
     readonly property color effectiveColor: {
@@ -34,8 +34,8 @@ Item {
     onBatteryLevelChanged: animatedLevel = batteryLevel
     Component.onCompleted: animatedLevel = batteryLevel
 
-    width: 96
-    height: 96
+    width: 64
+    height: 64
 
     Canvas {
         id: canvas
