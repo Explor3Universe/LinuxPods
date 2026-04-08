@@ -22,13 +22,13 @@ Column {
     onInEarChanged: root.opacity = root.targetOpacity
     Component.onCompleted: root.opacity = root.targetOpacity
 
-    spacing: 6
+    spacing: 8
 
     // Ring + image stack
     Item {
         anchors.horizontalCenter: parent.horizontalCenter
-        width: 88
-        height: 88
+        width: 96
+        height: 96
 
         BatteryIndicator {
             anchors.fill: parent
@@ -42,7 +42,7 @@ Column {
             source: root.iconSource
             // Case icon is rendered larger (no L/R indicator), pods are smaller
             // because they share the ring with their mirrored counterpart.
-            width: root.indicator === "" ? 56 : 48
+            width: root.indicator === "" ? 60 : 50
             height: width
             fillMode: Image.PreserveAspectFit
             mipmap: true
@@ -62,16 +62,29 @@ Column {
         font.family: "Inter"
         font.pixelSize: 9
         font.bold: true
-        font.letterSpacing: 1.6
+        font.letterSpacing: 2.4
     }
 
-    // Battery percentage
-    Text {
+    // Battery percentage — large with smaller "%" sign
+    Row {
         anchors.horizontalCenter: parent.horizontalCenter
-        text: root.batteryLevel + "%"
-        color: "#ffffff"
-        font.family: "Inter"
-        font.pixelSize: 18
-        font.weight: Font.Black
+        spacing: 0
+
+        Text {
+            text: root.batteryLevel
+            color: "#ffffff"
+            font.family: "Inter"
+            font.pixelSize: 24
+            font.weight: Font.Black
+        }
+        Text {
+            text: "%"
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 4
+            color: Qt.rgba(1, 1, 1, 0.55)
+            font.family: "Inter"
+            font.pixelSize: 12
+            font.weight: Font.Bold
+        }
     }
 }

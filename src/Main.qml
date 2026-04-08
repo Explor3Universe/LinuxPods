@@ -20,10 +20,10 @@ import QtQuick.Layouts 1.15
 ApplicationWindow {
     id: mainWindow
     visible: !airPodsTrayApp.hideOnStart
-    width: 460
-    height: 720
-    minimumWidth: 420
-    minimumHeight: 600
+    width: 480
+    height: 880
+    minimumWidth: 440
+    minimumHeight: 640
     title: "LinuxPods"
     objectName: "mainWindowObject"
     color: "transparent"
@@ -181,16 +181,52 @@ ApplicationWindow {
                         }
                     }
 
-                    // ── Hero: battery ring grid ──────────────────────
+                    // ── Hero: big device image with primary glow ─────
                     Item {
                         Layout.fillWidth: true
-                        Layout.topMargin: 8
-                        Layout.preferredHeight: heroRow.implicitHeight + 16
+                        Layout.topMargin: 4
+                        Layout.preferredHeight: 200
+
+                        // Outer glow halo
+                        Rectangle {
+                            anchors.centerIn: parent
+                            width: 260
+                            height: 260
+                            radius: width / 2
+                            color: Qt.rgba(53 / 255, 132 / 255, 228 / 255, 0.10)
+                        }
+                        // Inner glow halo
+                        Rectangle {
+                            anchors.centerIn: parent
+                            width: 190
+                            height: 190
+                            radius: width / 2
+                            color: Qt.rgba(53 / 255, 132 / 255, 228 / 255, 0.16)
+                        }
+
+                        Image {
+                            anchors.centerIn: parent
+                            source: "qrc:/icons/assets/airpods.png"
+                            width: 180
+                            height: 180
+                            fillMode: Image.PreserveAspectFit
+                            mipmap: true
+                            smooth: true
+                        }
+                    }
+
+                    // ── Battery ring grid: 3 columns (L · Case · R) ──
+                    // Headset shown only as a fallback when neither L nor R is available
+                    // (covers e.g. AirPods Max).
+                    Item {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 6
+                        Layout.preferredHeight: heroRow.implicitHeight + 12
 
                         Row {
                             id: heroRow
-                            anchors.centerIn: parent
-                            spacing: 18
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            spacing: 28
 
                             PodColumn {
                                 visible: airPodsTrayApp.deviceInfo.battery.leftPodAvailable
@@ -218,8 +254,11 @@ ApplicationWindow {
                                 indicator: "R"
                             }
 
+                            // Fallback for AirPods Max etc. — only when no L/R pod data.
                             PodColumn {
                                 visible: airPodsTrayApp.deviceInfo.battery.headsetAvailable
+                                       && !airPodsTrayApp.deviceInfo.battery.leftPodAvailable
+                                       && !airPodsTrayApp.deviceInfo.battery.rightPodAvailable
                                 inEar: true
                                 iconSource: "qrc:/icons/assets/" + airPodsTrayApp.deviceInfo.podIcon
                                 batteryLevel: airPodsTrayApp.deviceInfo.battery.headsetLevel
@@ -305,10 +344,25 @@ ApplicationWindow {
                         Layout.rightMargin: 22
                         title: qsTr("Conversational Awareness")
                         subtitle: qsTr("Lowers media when you speak")
-                        icon: "\u26AC"
+                        icon: "\u2B25"
                         checked: airPodsTrayApp.deviceInfo.conversationalAwareness
                         visible: airPodsTrayApp.airpodsConnected
                         onToggled: (v) => airPodsTrayApp.setConversationalAwareness(v)
+                    }
+
+                    // Feature card: Spatial Audio (placeholder; not yet wired to backend)
+                    FeatureCard {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 22
+                        Layout.rightMargin: 22
+                        title: qsTr("Spatial Audio")
+                        subtitle: qsTr("Immersive surround sound")
+                        icon: "\u25C9"
+                        checked: false
+                        enabled: false
+                        opacity: 0.55
+                        visible: airPodsTrayApp.airpodsConnected
+                        onToggled: (v) => {}
                     }
 
                     // Feature card: Hearing Aid
@@ -322,6 +376,72 @@ ApplicationWindow {
                         checked: airPodsTrayApp.deviceInfo.hearingAidEnabled
                         visible: airPodsTrayApp.airpodsConnected
                         onToggled: (v) => airPodsTrayApp.setHearingAidEnabled(v)
+                    }
+
+                    // ── Status footer card (mesh-gradient look) ─────
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 22
+                        Layout.rightMargin: 22
+                        Layout.topMargin: 6
+                        Layout.preferredHeight: 110
+                        radius: 24
+                        color: "#0e0e0e"
+                        border.width: 1
+                        border.color: Qt.rgba(1, 1, 1, 0.06)
+                        visible: airPodsTrayApp.airpodsConnected
+
+                        // Faux mesh gradient via two radial-ish overlays.
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: parent.radius
+                            gradient: Gradient {
+                                orientation: Gradient.Horizontal
+                                GradientStop { position: 0.0; color: Qt.rgba(53/255, 132/255, 228/255, 0.10) }
+                                GradientStop { position: 1.0; color: Qt.rgba(224/255, 27/255, 36/255, 0.04) }
+                            }
+                        }
+
+                        ColumnLayout {
+                            anchors.left: parent.left
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.leftMargin: 26
+                            spacing: 4
+
+                            Text {
+                                text: qsTr("STATUS")
+                                color: "#7bafff"
+                                font.family: "Inter"
+                                font.pixelSize: 9
+                                font.bold: true
+                                font.letterSpacing: 2.4
+                            }
+                            Text {
+                                text: qsTr("System Optimal")
+                                color: "#ffffff"
+                                font.family: "Inter"
+                                font.pixelSize: 18
+                                font.bold: true
+                            }
+                            Text {
+                                text: qsTr("LinuxPods 0.1.0 • AAP active")
+                                color: "#9a9996"
+                                font.family: "Inter"
+                                font.pixelSize: 10
+                            }
+                        }
+
+                        // Big translucent verified glyph (uses bundled SF Symbols font).
+                        Text {
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.rightMargin: 24
+                            text: "\u2713"
+                            color: Qt.rgba(1, 1, 1, 0.10)
+                            font.family: "Inter"
+                            font.pixelSize: 64
+                            font.bold: true
+                        }
                     }
 
                     // Bottom spacer
