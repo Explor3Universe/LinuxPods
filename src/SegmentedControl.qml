@@ -3,91 +3,109 @@ pragma ComponentBehavior: Bound
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 
+// Stitch-style segmented control: glass-morphism container with
+// primary-glow active button. Public API (model, currentIndex) is
+// preserved from the original implementation.
 Control {
     id: root
 
-    // Properties
-    property var model: ["Option 1", "Option 2"] // Default model
+    property var model: ["Option 1", "Option 2"]
     property int currentIndex: 0
 
-    // Colors using system palette
-    readonly property color backgroundColor: palette.light
-    readonly property color selectedColor: palette.highlight
-    readonly property color textColor: palette.buttonText
-    readonly property color selectedTextColor: palette.highlightedText
+    // Stitch design system colours
+    readonly property color glassColor: Qt.rgba(30 / 255, 30 / 255, 30 / 255, 0.55)
+    readonly property color borderColor: Qt.rgba(1, 1, 1, 0.06)
+    readonly property color activeColor: "#3584e4"
+    readonly property color activeGlow: Qt.rgba(53 / 255, 132 / 255, 228 / 255, 0.35)
+    readonly property color inactiveTextColor: "#9a9996"
+    readonly property color activeTextColor: "#ffffff"
 
-    // System palette
-    SystemPalette {
-        id: palette
-    }
-
-    // Internal properties
     padding: 6
-    implicitHeight: 32
-    // Removed: implicitWidth: Math.max(200, model.length * 100)
+    implicitHeight: 44
 
-    // Set focus policy to enable keyboard navigation
     focusPolicy: Qt.StrongFocus
     activeFocusOnTab: true
 
-    // Styling
     background: Rectangle {
-        radius: height / 2
-        color: root.backgroundColor
-        border.width: root.activeFocus ? 1 : 0
-        border.color: root.selectedColor
+        radius: 16
+        color: root.glassColor
+        border.width: 1
+        border.color: root.borderColor
     }
 
     contentItem: Row {
-        spacing: root.padding
+        spacing: 4
 
         Repeater {
             model: root.model
 
-            delegate: Button {
-                id: segmentButton
+            delegate: Item {
+                id: segmentRoot
                 required property int index
                 required property string modelData
-                text: modelData
-                // Removed: width: (root.availableWidth - (root.model.length - 1) * root.padding) / root.model.length
+                width: (root.availableWidth - (root.model.length - 1) * 4) / root.model.length
                 height: root.availableHeight
-                focusPolicy: Qt.NoFocus // Let the root control handle focus
 
-                // Add explicit text color
-                contentItem: Text {
-                    text: segmentButton.text
-                    font: segmentButton.font
-                    color: root.currentIndex === segmentButton.index ? root.selectedTextColor : root.textColor
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    leftPadding: 2
-                    rightPadding: 2
-                    elide: Text.ElideRight
-                }
+                readonly property bool isActive: root.currentIndex === segmentRoot.index
 
-                background: Rectangle {
-                    radius: height / 2
-                    color: root.currentIndex === segmentButton.index ? root.selectedColor : "transparent"
-                    border.width: 0
+                Rectangle {
+                    id: pill
+                    anchors.fill: parent
+                    radius: 12
+                    color: segmentRoot.isActive ? root.activeColor : "transparent"
+                    border.width: segmentRoot.isActive ? 1 : 0
+                    border.color: Qt.rgba(1, 1, 1, 0.1)
+
+                    // Soft outer glow when active.
+                    Rectangle {
+                        anchors.fill: parent
+                        anchors.margins: -3
+                        radius: parent.radius + 3
+                        color: "transparent"
+                        border.color: root.activeGlow
+                        border.width: 3
+                        visible: segmentRoot.isActive
+                        z: -1
+                    }
 
                     Behavior on color {
-                        ColorAnimation {
-                            duration: 600
-                            easing.type: Easing.OutQuad
-                        }
+                        ColorAnimation { duration: 220; easing.type: Easing.OutCubic }
                     }
                 }
 
-                onClicked: {
-                    if (root.currentIndex !== index) {
-                        root.currentIndex = index;
+                Text {
+                    anchors.centerIn: parent
+                    text: segmentRoot.modelData
+                    horizontalAlignment: Text.AlignHCenter
+                    color: segmentRoot.isActive ? root.activeTextColor : root.inactiveTextColor
+                    font.family: "Inter"
+                    font.pixelSize: 10
+                    font.bold: true
+                    font.letterSpacing: 0.6
+                    elide: Text.ElideRight
+                    width: parent.width - 8
+
+                    Behavior on color {
+                        ColorAnimation { duration: 220 }
                     }
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        if (root.currentIndex !== segmentRoot.index) {
+                            root.currentIndex = segmentRoot.index;
+                        }
+                    }
+                    onEntered: if (!segmentRoot.isActive) pill.color = Qt.rgba(1, 1, 1, 0.04)
+                    onExited: if (!segmentRoot.isActive) pill.color = "transparent"
                 }
             }
         }
     }
 
-    // Handle key events for navigation
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Left) {
             if (root.currentIndex > 0) {
@@ -107,7 +125,7 @@ Control {
             event.accepted = true;
         } else if (event.key >= Qt.Key_1 && event.key <= Qt.Key_9) {
             const index = event.key - Qt.Key_1;
-            if (index <= root.model.length) {
+            if (index < root.model.length) {
                 root.currentIndex = index;
                 event.accepted = true;
             }

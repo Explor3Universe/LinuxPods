@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LibrePods Manager</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#3584e4",
+                    "secondary": "#1c71d8",
+                    "background": "#000000",
+                    "surface": "#121212",
+                    "surface-variant": "#1e1e1e",
+                    "on-surface": "#ffffff",
+                    "on-surface-variant": "#9a9996",
+                    "outline": "#3d3d3d",
+                    "outline-variant": "#242424",
+                    "primary-container": "rgba(53, 132, 228, 0.1)",
+                    "glass": "rgba(30, 30, 30, 0.6)",
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.5rem",
+                    "lg": "1rem",
+                    "xl": "1.5rem",
+                    "2xl": "2rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .battery-ring {
+            transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            filter: drop-shadow(0 0 4px rgba(53, 132, 228, 0.5));
+        }
+        .glass-morphism {
+            background: rgba(30, 30, 30, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .mesh-gradient {
+            background-color: #121212;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(53, 132, 228, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(224, 27, 36, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(53, 132, 228, 0.05) 0px, transparent 50%);
+        }
+        body {
+            min-height: 100dvh;
+            background: radial-gradient(circle at top center, #1a1a1a 0%, #000000 100%);
+        }
+    </style>
+</head>
+<body class="text-on-surface font-body selection:bg-primary/30 flex flex-col antialiased">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full bg-black/40 backdrop-blur-md z-50 flex justify-between items-center px-8 py-5 border-b border-white/5">
+<div class="flex items-center gap-4">
+<button class="text-on-surface/80 hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="font-bold tracking-tight text-base uppercase tracking-widest text-white/90">AirPods Pro</h1>
+</div>
+<button class="text-on-surface/80 hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</header>
+<main class="flex-1 mt-24 mb-32 px-6 max-w-lg mx-auto w-full">
+<!-- Hero Section: Device Visualization -->
+<section class="relative py-8 flex flex-col items-center gap-12">
+<!-- Central Device Image -->
+<div class="relative group">
+<div class="absolute inset-0 bg-primary/20 blur-[80px] rounded-full scale-125 transition-transform duration-1000 group-hover:scale-150"></div>
+<img alt="AirPods Pro" class="relative w-64 h-auto drop-shadow-[0_20px_50px_rgba(255,255,255,0.1)] z-10" src="https://lh3.googleusercontent.com/aida/ADBb0uibecBxBxyhnxH2yeoTkmJ_HeG-WBLgKTFQE94Jq3Jn7p4IIZiy-thJ3Uygm0D3xc0xw1rFTTvCvRoV5IjKdMvhBMdzmCR_PQ533lOFEeLfy5z9og8GYS3LpJaPtXkT87qVR7T0NKaBTLc2gRLB8ByTomof0zG2Cd0W6_ADEEDDu9piblKr9NJnnQkj0qwyHOWKCV501Cediw8i674EykuAufk9daeiVIUnr5TZn80dmTIfmhDCBnqPOJTKRXSg303UGn2UI5cZ"/>
+</div>
+<!-- Battery Status Grid -->
+<div class="grid grid-cols-3 gap-10 w-full">
+<!-- Left AirPod -->
+<div class="flex flex-col items-center gap-3">
+<div class="relative w-24 h-24 flex items-center justify-center">
+<svg class="absolute inset-0 w-full h-full">
+<circle class="text-white/5" cx="48" cy="48" fill="none" r="44" stroke="currentColor" stroke-width="1.5"></circle>
+<circle class="text-primary battery-ring" cx="48" cy="48" fill="none" r="44" stroke="currentColor" stroke-dasharray="276.46" stroke-dashoffset="55.29" stroke-linecap="round" stroke-width="2"></circle>
+</svg>
+<img alt="Left Earbud" class="w-12 h-12 object-contain z-10" src="https://lh3.googleusercontent.com/aida/ADBb0uj3-OoqwNtL0Y3QHshAb-zNG4dmDgrnr3ez8Lk1YPsCEAW0g-wPIxQtpSUgaOrnlrOni17A0SM3Q2H0-C5fsY80aCMEhn_0iktvhaLOe1dtCfVJYZZ6WGkTk32r1Ik1-BMFOGHu6DuB24n4xABrma131xzPRufYnXE2bmY1VI3XoXxOH7Nt8uW_Dr0wt8yORdbn13nqUkOz6hvFW487vtjgLdQ3Moj5N1nVFViBlKjVHQOgt0sB3vtDk-CPl9Cub5U9zGxgfPhQ9A"/>
+</div>
+<div class="text-center">
+<span class="block text-[10px] uppercase tracking-[0.2em] font-bold text-on-surface-variant mb-0.5">Left</span>
+<span class="text-2xl font-black text-on-surface tabular-nums">80<span class="text-sm ml-0.5 opacity-60">%</span></span>
+</div>
+</div>
+<!-- Case Status -->
+<div class="flex flex-col items-center gap-3">
+<div class="relative w-24 h-24 flex items-center justify-center">
+<svg class="absolute inset-0 w-full h-full">
+<circle class="text-white/5" cx="48" cy="48" fill="none" r="44" stroke="currentColor" stroke-width="1.5"></circle>
+<circle class="text-primary battery-ring" cx="48" cy="48" fill="none" r="44" stroke="currentColor" stroke-dasharray="276.46" stroke-dashoffset="0" stroke-linecap="round" stroke-width="2"></circle>
+</svg>
+<img alt="Case" class="w-14 h-14 object-contain z-10" src="https://lh3.googleusercontent.com/aida/ADBb0uhfxFRB3ya0LfUMhailEX0IbLtt8ZZlQ-zZTDEM3b7eVlErVHTOZK_9rKT79NztLslMvzr23V9NNEFrZQYLTjOMaAepgC3Rx_QeQvvr3z98B1FW7agXyQEZUAYafycmmpXss5IVhHf9VJPv5GbML1g4gQcGADVFJUWwEuBp5shklJXmZV5F67buNlPJP-ZydbnmAmq8QOGeHxGxJieFx8ryn_dPkWrde48s-hiBl9GKJrXXkNoS9fmAwHzOu33aO9nN8C0gXhL_dw"/>
+</div>
+<div class="text-center">
+<span class="block text-[10px] uppercase tracking-[0.2em] font-bold text-on-surface-variant mb-0.5">Case</span>
+<span class="text-2xl font-black text-on-surface tabular-nums">100<span class="text-sm ml-0.5 opacity-60">%</span></span>
+</div>
+</div>
+<!-- Right AirPod -->
+<div class="flex flex-col items-center gap-3">
+<div class="relative w-24 h-24 flex items-center justify-center">
+<svg class="absolute inset-0 w-full h-full">
+<circle class="text-white/5" cx="48" cy="48" fill="none" r="44" stroke="currentColor" stroke-width="1.5"></circle>
+<circle class="text-primary battery-ring" cx="48" cy="48" fill="none" r="44" stroke="currentColor" stroke-dasharray="276.46" stroke-dashoffset="13.82" stroke-linecap="round" stroke-width="2"></circle>
+</svg>
+<img alt="Right Earbud" class="w-12 h-12 object-contain z-10 scale-x-[-1]" src="https://lh3.googleusercontent.com/aida/ADBb0uj3-OoqwNtL0Y3QHshAb-zNG4dmDgrnr3ez8Lk1YPsCEAW0g-wPIxQtpSUgaOrnlrOni17A0SM3Q2H0-C5fsY80aCMEhn_0iktvhaLOe1dtCfVJYZZ6WGkTk32r1Ik1-BMFOGHu6DuB24n4xABrma131xzPRufYnXE2bmY1VI3XoXxOH7Nt8uW_Dr0wt8yORdbn13nqUkOz6hvFW487vtjgLdQ3Moj5N1nVFViBlKjVHQOgt0sB3vtDk-CPl9Cub5U9zGxgfPhQ9A"/>
+</div>
+<div class="text-center">
+<span class="block text-[10px] uppercase tracking-[0.2em] font-bold text-on-surface-variant mb-0.5">Right</span>
+<span class="text-2xl font-black text-on-surface tabular-nums">95<span class="text-sm ml-0.5 opacity-60">%</span></span>
+</div>
+</div>
+</div>
+</section>
+<!-- Noise Control Modes -->
+<section class="mt-10">
+<h2 class="text-[11px] font-bold uppercase tracking-[0.25em] text-on-surface-variant mb-4 ml-1">Noise Control</h2>
+<div class="glass-morphism p-1.5 rounded-2xl flex gap-1">
+<!-- Mode: Off -->
+<button class="flex-1 py-4 px-1 rounded-xl flex flex-col items-center gap-2 transition-all duration-300 hover:bg-white/5 group text-on-surface-variant">
+<span class="material-symbols-outlined text-2xl group-hover:text-white" data-icon="block">block</span>
+<span class="text-[9px] font-bold uppercase tracking-tight">Off</span>
+</button>
+<!-- Mode: Transparency -->
+<button class="flex-1 py-4 px-1 rounded-xl flex flex-col items-center gap-2 transition-all duration-300 hover:bg-white/5 group text-on-surface-variant">
+<span class="material-symbols-outlined text-2xl group-hover:text-white" data-icon="record_voice_over">record_voice_over</span>
+<span class="text-[9px] font-bold uppercase tracking-tight">Transp.</span>
+</button>
+<!-- Mode: Adaptive -->
+<button class="flex-1 py-4 px-1 rounded-xl flex flex-col items-center gap-2 bg-primary shadow-[0_0_20px_rgba(53,132,228,0.3)] text-white border border-white/10">
+<span class="material-symbols-outlined text-2xl" data-icon="auto_awesome" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="text-[9px] font-bold uppercase tracking-tight">Adaptive</span>
+</button>
+<!-- Mode: Noise Cancellation -->
+<button class="flex-1 py-4 px-1 rounded-xl flex flex-col items-center gap-2 transition-all duration-300 hover:bg-white/5 group text-on-surface-variant">
+<span class="material-symbols-outlined text-2xl group-hover:text-white" data-icon="noise_control_on">noise_control_on</span>
+<span class="text-[9px] font-bold uppercase tracking-tight">Noise Can.</span>
+</button>
+</div>
+</section>
+<!-- Audio Features Bento -->
+<section class="mt-12 space-y-4">
+<h2 class="text-[11px] font-bold uppercase tracking-[0.25em] text-on-surface-variant mb-4 ml-1">Features</h2>
+<div class="space-y-3">
+<!-- Conversational Awareness -->
+<div class="glass-morphism p-5 rounded-3xl flex items-center justify-between group transition-all duration-300 hover:bg-white/[0.08] active:scale-[0.98]">
+<div class="flex items-center gap-5">
+<div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-primary border border-white/5 transition-colors group-hover:bg-primary/20">
+<span class="material-symbols-outlined text-2xl" data-icon="forum">forum</span>
+</div>
+<div>
+<h3 class="text-sm font-semibold text-on-surface">Conversational Awareness</h3>
+<p class="text-[11px] text-on-surface-variant">Lowers media when you speak</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-12 h-7 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-transparent after:content-[''] after:absolute after:top-[4px] after:start-[4px] after:bg-white after:rounded-full after:h-[20px] after:w-[20px] after:transition-all after:duration-300 peer-checked:bg-primary"></div>
+</label>
+</div>
+<!-- Spatial Audio -->
+<div class="glass-morphism p-5 rounded-3xl flex items-center justify-between group transition-all duration-300 hover:bg-white/[0.08] active:scale-[0.98]">
+<div class="flex items-center gap-5">
+<div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-primary border border-white/5 transition-colors group-hover:bg-primary/20">
+<span class="material-symbols-outlined text-2xl" data-icon="3d_rotation" style="font-variation-settings: 'FILL' 1;">3d_rotation</span>
+</div>
+<div>
+<h3 class="text-sm font-semibold text-on-surface">Spatial Audio</h3>
+<p class="text-[11px] text-on-surface-variant">Immersive surround sound</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-12 h-7 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-transparent after:content-[''] after:absolute after:top-[4px] after:start-[4px] after:bg-white after:rounded-full after:h-[20px] after:w-[20px] after:transition-all after:duration-300 peer-checked:bg-primary"></div>
+</label>
+</div>
+<!-- Hearing Aid -->
+<div class="glass-morphism p-5 rounded-3xl flex items-center justify-between group transition-all duration-300 hover:bg-white/[0.08] active:scale-[0.98]">
+<div class="flex items-center gap-5">
+<div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-primary border border-white/5 transition-colors group-hover:bg-primary/20">
+<span class="material-symbols-outlined text-2xl" data-icon="hearing">hearing</span>
+</div>
+<div>
+<h3 class="text-sm font-semibold text-on-surface">Hearing Aid Mode</h3>
+<p class="text-[11px] text-on-surface-variant">Amplifies environmental speech</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-12 h-7 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-transparent after:content-[''] after:absolute after:top-[4px] after:start-[4px] after:bg-white after:rounded-full after:h-[20px] after:w-[20px] after:transition-all after:duration-300 peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</section>
+<!-- Firmware Status -->
+<section class="mt-12 mb-8">
+<div class="relative h-36 rounded-3xl overflow-hidden group mesh-gradient border border-white/5 shadow-2xl">
+<div class="absolute inset-0 flex flex-col justify-center px-8 z-10">
+<span class="text-[9px] font-bold uppercase tracking-[0.3em] text-primary mb-1">Status</span>
+<h4 class="text-xl font-bold text-white mb-0.5">System Optimal</h4>
+<p class="text-[11px] text-on-surface-variant">Version 6A321 • Updated 2h ago</p>
+</div>
+<div class="absolute right-8 top-1/2 -translate-y-1/2 text-white/10 group-hover:text-primary/20 transition-colors duration-500">
+<span class="material-symbols-outlined text-7xl select-none" data-icon="verified">verified</span>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-8 pb-10 pt-5 bg-black/80 backdrop-blur-2xl border-t border-white/10">
+<a class="flex flex-col items-center justify-center text-primary group transition-all duration-300" href="#">
+<span class="material-symbols-outlined text-2xl mb-1 group-active:scale-90 transition-transform" data-icon="headphones" style="font-variation-settings: 'FILL' 1;">headphones</span>
+<span class="text-[9px] uppercase tracking-widest font-bold">Devices</span>
+</a>
+<a class="flex flex-col items-center justify-center text-white/40 hover:text-white transition-all duration-300" href="#">
+<span class="material-symbols-outlined text-2xl mb-1" data-icon="graphic_eq">graphic_eq</span>
+<span class="text-[9px] uppercase tracking-widest font-bold">Sound</span>
+</a>
+<a class="flex flex-col items-center justify-center text-white/40 hover:text-white transition-all duration-300" href="#">
+<span class="material-symbols-outlined text-2xl mb-1" data-icon="tune">tune</span>
+<span class="text-[9px] uppercase tracking-widest font-bold">Setup</span>
+</a>
+</nav>
+</body></html>
