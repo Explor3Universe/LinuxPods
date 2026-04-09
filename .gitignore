@@ -1,4 +1,6 @@
 out/
+build/
+CMakeFiles/
 rpmbuild/
 *.rpm
 *.tar.gz

@@ -1,0 +1,14 @@
+[Unit]
+Description=LinuxPods AirPods Daemon
+Documentation=https://github.com/Puerh0x1/LinuxPods
+After=dbus.service bluetooth.target
+Wants=bluetooth.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/linuxpods-daemon
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

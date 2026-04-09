@@ -34,6 +34,8 @@ public:
     void updateNoiseControlState(AirpodsTrayApp::Enums::NoiseControlMode);
     void updateConversationalAwareness(bool enabled);
     void showNotification(const QString &title, const QString &message);
+    void showAssociatedWindow(const QPoint &pos = QPoint());
+    void hideAssociatedWindow();
 
     bool notificationsEnabled() const { return m_notificationsEnabled; }
     void setNotificationsEnabled(bool enabled);
@@ -47,10 +49,9 @@ public:
 signals:
     void notificationsEnabledChanged(bool enabled);
 
-    // Emitted on left-click. `pos` is the global screen coordinate of the
-    // tray icon (X11) or a best-effort approximation derived from the
-    // KStatusNotifierItem activation request (Wayland).
-    void trayClickedAt(const QPoint &pos);
+    // Emitted when the host asks us to show or hide the associated popup.
+    // `active=true` means "show/open", `false` means "hide/close".
+    void trayActivationRequested(bool active, const QPoint &pos);
 
     // Legacy signal kept for menu wiring; carries no positional info.
     void trayClicked();

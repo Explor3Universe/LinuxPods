@@ -34,9 +34,11 @@ TrayIconManager::TrayIconManager(QObject *parent) : QObject(parent)
     // us the actual click position — exactly what we need to anchor the
     // popup next to the tray icon on Wayland.
     connect(trayIcon, &KStatusNotifierItem::activateRequested,
-            this, [this](bool /*active*/, const QPoint &pos) {
-                emit trayClickedAt(pos);
-                emit trayClicked();
+            this, [this](bool active, const QPoint &pos) {
+                emit trayActivationRequested(active, pos);
+                if (active) {
+                    emit trayClicked();
+                }
             });
 }
 
@@ -58,6 +60,28 @@ void TrayIconManager::setAssociatedQmlWindow(QWindow *window)
 {
     if (trayIcon && window) {
         trayIcon->setAssociatedWindow(window);
+    }
+}
+
+void TrayIconManager::showAssociatedWindow(const QPoint &pos)
+{
+    if (!trayIcon) {
+        return;
+    }
+
+    if (auto *window = trayIcon->associatedWindow(); window && window->isVisible()) {
+        window->raise();
+        window->requestActivate();
+        return;
+    }
+
+    trayIcon->activate(pos);
+}
+
+void TrayIconManager::hideAssociatedWindow()
+{
+    if (trayIcon) {
+        trayIcon->hideAssociatedWindow();
     }
 }
 

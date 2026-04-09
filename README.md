@@ -1,143 +1,139 @@
 # LinuxPods
 
-Форк [LibrePods](https://github.com/kavishdevar/librepods) с локально вендоренными исходниками и RPM-пакетом для Fedora/RHEL.
+Native AirPods integration for Linux. Battery monitoring, noise control, ear detection, and more — as a native KDE Plasma 6 system tray widget.
 
-LibrePods — нативное Linux-приложение, которое разблокирует фичи Apple AirPods на не-Apple устройствах через reverse-engineered Apple Accessory Protocol (AAP) поверх L2CAP. **LinuxPods** держит исходники upstream проекта прямо в репозитории под `src/`, что позволяет легко модифицировать UI/QML и core логику без зависимости от удалённого snapshot.
+Built on the reverse-engineered Apple Accessory Protocol (AAP) over L2CAP.
 
-## Возможности
+## Features
 
-- Заряд батареи (левый, правый наушник, кейс)
-- ANC / Transparency / Adaptive / Off режимы
-- Ear detection (автопауза при вынимании)
+- Battery status (left, right, case, AirPods Max headset)
+- Noise control: ANC / Transparency / Adaptive / Off
+- Ear detection with auto-pause/play
 - Conversational Awareness
-- Уведомления при подключении
-- Tray-иконка в KDE Plasma
+- One Bud ANC mode
+- Hearing Aid mode
+- Connection notifications
+- Native KDE Plasma 6 system tray widget
+- D-Bus API for scripting and integration
+- CLI tool (`librepods-ctl`)
 
-Протестировано на **AirPods Pro 2 USB-C (2024)** на Fedora 43 + KDE Plasma 6.
+Tested on **AirPods Pro 2 USB-C (2024)**, Fedora 43 + KDE Plasma 6 + Wayland.
 
-## Структура репозитория
+## Architecture
 
 ```
-LinuxPods/
-├── src/                ← вендоренные исходники librepods/linux (C++ + QML)
-│   ├── CMakeLists.txt
-│   ├── main.cpp
-│   ├── BluetoothMonitor.{cpp,h}
-│   ├── ble/            ← BLE manager и утилиты
-│   ├── media/          ← MPRIS и PulseAudio контроллеры
-│   ├── thirdparty/     ← QR-Code-generator
-│   ├── translations/   ← .ts файлы переводов
-│   ├── assets/         ← иконки и ресурсы (компилируются в бинарь)
-│   ├── Main.qml        ← главное окно
-│   ├── BatteryIndicator.qml
-│   ├── PodColumn.qml
-│   ├── SegmentedControl.qml
-│   ├── Icon.qml
-│   └── KeysQRDialog.qml
-├── docs/               ← документация AAP протокола (для reference)
-│   ├── AAP Definitions.md
-│   ├── Proximity Pairing Message.md
-│   └── proximity_keys.py
-├── linuxpods.spec      ← RPM spec
-├── build.sh            ← билдер: src/ → tarball → rpmbuild → out/
-├── LICENSE             ← GPL-3.0
-└── out/                ← собранные .rpm (gitignore)
+linuxpods-daemon          Headless C++ backend (BLE, AAP protocol, media)
+       │
+       │ D-Bus: me.kavishdevar.linuxpods
+       │
+  Plasma plasmoid         Native system tray widget (QML)
 ```
 
-## Установка готового RPM
+The daemon manages AirPods connections and exposes state over D-Bus. The Plasma plasmoid displays battery, controls noise modes, and toggles features — all through the D-Bus interface.
 
-Скачай `.rpm` из [Releases](https://github.com/Puerh0x1/LinuxPods/releases) (или собери сам, см. ниже) и поставь:
+## Installation
+
+### From RPM (Fedora)
 
 ```bash
-sudo dnf install ./linuxpods-0.1.0-1.fc43.x86_64.rpm
+sudo dnf install ./linuxpods-0.2.0-1.fc43.x86_64.rpm ./linuxpods-plasmoid-0.2.0-1.fc43.x86_64.rpm
+systemctl --user enable --now linuxpods-daemon
 ```
 
-Запусти из меню KDE (`LibrePods`) или из терминала:
+The plasmoid appears in the system tray automatically when AirPods connect.
+
+### Build from source
 
 ```bash
-librepods --hide   # стартует свёрнутым в трей
-```
-
-CLI:
-
-```bash
-librepods-ctl noise:anc           # включить ANC
-librepods-ctl noise:transparency  # transparency
-librepods-ctl noise:adaptive      # adaptive
-librepods-ctl noise:off           # выключить
-```
-
-## Сборка из исходников
-
-Требования: Fedora 39+ (или совместимый дистрибутив с rpm-build).
-
-```bash
-git clone git@github.com:Puerh0x1/LinuxPods.git
+git clone https://github.com/Puerh0x1/LinuxPods.git
 cd LinuxPods
-./build.sh                # ставит BuildRequires через sudo dnf builddep, потом rpmbuild
-# или, если deps уже стоят:
-./build.sh --skip-deps
-sudo dnf install ./out/linuxpods-0.1.0-1.fc43.x86_64.rpm
+
+# RPM build
+./build.sh                # installs build dependencies via dnf
+./build.sh --skip-deps    # if deps already installed
+sudo dnf install out/linuxpods-0.2.0-*.rpm out/linuxpods-plasmoid-0.2.0-*.rpm
+
+# Or local build without RPM
+cmake -S src -B build
+cmake --build build -j$(nproc)
+./build/linuxpods-daemon
 ```
 
-Готовые RPM в `./out/`. Промежуточный rpmbuild tree — в `~/.cache/linuxpods-rpmbuild/` (т.к. rpmbuild не дружит с пробелами в путях, а корень репо может лежать на «Рабочем столе»).
+### Build dependencies
 
-## Разработка / модификация
+- cmake >= 3.16, gcc-c++
+- qt6-qtbase-devel, qt6-qtconnectivity-devel, qt6-qtdeclarative-devel, qt6-qttools-devel
+- kf6-kstatusnotifieritem-devel
+- openssl-devel, pulseaudio-libs-devel
 
-Это **самое важное** ради чего нужен этот форк: можно прямо менять файлы в `src/`, и `./build.sh` пересобирает RPM из локальной копии.
+## Usage
 
-### Дизайн (QML)
-
-UI собран на Qt6 Quick + Qt Quick Controls. Основные точки:
-
-- **`src/Main.qml`** — главное окно (то что открывается при клике на трей)
-- **`src/BatteryIndicator.qml`** — индикатор батареи (тот самый bar fill для каждого наушника)
-- **`src/PodColumn.qml`** — колонка с одним подом (картинка + battery + label)
-- **`src/SegmentedControl.qml`** — переключатель ANC режимов
-- **`src/Icon.qml`** — обёртка над иконками
-- **`src/KeysQRDialog.qml`** — диалог QR-кода для cross-device handoff
-
-QML — декларативный, легко менять цвета, размеры, layouts через property binding. Не требует пересборки C++ кода.
-
-### Core логика (C++)
-
-- **`src/main.cpp`** — точка входа, инициализация Qt, регистрация QML типов, signal/slot wiring
-- **`src/BluetoothMonitor.{cpp,h}`** — мониторинг bluez D-Bus событий
-- **`src/ble/blemanager.{cpp,h}`** — BLE сканирование (для proximity adverts)
-- **`src/airpods_packets.h`** — определения AAP пакетов и опкодов
-- **`src/battery.hpp`** — battery state модель
-- **`src/eardetection.hpp`** — ear detection логика
-- **`src/trayiconmanager.{cpp,h}`** — KDE/Qt system tray интеграция
-- **`src/media/`** — media controls (MPRIS) и PulseAudio контроллер для switch sink при ear detection
-- **`src/librepods-ctl.cpp`** — отдельный CLI бинарь, общающийся с основным через QLocalSocket
-
-### AAP протокол
-
-Документация AAP (Apple Accessory Protocol) — в `docs/AAP Definitions.md` (опкоды, payload форматы) и `docs/Proximity Pairing Message.md` (зашифрованные BLE adverts).
-
-## Автозапуск
-
-Для запуска при логине положи `.desktop` в `~/.config/autostart/`:
+### Daemon
 
 ```bash
-cat > ~/.config/autostart/linuxpods.desktop <<'EOF'
-[Desktop Entry]
-Type=Application
-Name=LinuxPods
-Exec=librepods --hide
-Icon=librepods
-Terminal=false
-X-KDE-autostart-after=panel
-StartupNotify=false
-EOF
+systemctl --user enable --now linuxpods-daemon   # start + autostart
+systemctl --user status linuxpods-daemon         # check status
+journalctl --user -u linuxpods-daemon -f         # live logs
 ```
 
-## Лицензия
+### CLI
 
-**GPL-3.0-or-later** — наследуется от upstream LibrePods. Все модификации и форки этого репозитория обязаны оставаться под GPL-3.0.
+```bash
+librepods-ctl noise:anc           # Active Noise Cancellation
+librepods-ctl noise:transparency  # Transparency mode
+librepods-ctl noise:adaptive      # Adaptive mode
+librepods-ctl noise:off           # Off
+```
 
-## Upstream
+### D-Bus
 
-Все копирайты и оригинальная разработка кода принадлежат [kavishdevar/librepods](https://github.com/kavishdevar/librepods). LinuxPods — независимый форк, поддерживаемый локально для удобства модификации и упаковки.
+```bash
+# Read all properties
+gdbus call --session -d me.kavishdevar.linuxpods \
+  -o /me/kavishdevar/linuxpods \
+  -m org.freedesktop.DBus.Properties.GetAll \
+  me.kavishdevar.linuxpods.Manager
 
-Базовая копия исходников снята с upstream commit `1f2d707` (2026-04-06).
+# Set noise control mode (0=Off, 1=ANC, 2=Transparency, 3=Adaptive)
+gdbus call --session -d me.kavishdevar.linuxpods \
+  -o /me/kavishdevar/linuxpods \
+  -m me.kavishdevar.linuxpods.Manager.SetNoiseControlMode 3
+```
+
+## Project Structure
+
+```
+src/
+  service/linuxpodsservice.*    Backend logic (BLE, AAP, media, settings)
+  dbus/linuxpodsdbusadaptor.h   D-Bus interface adaptor
+  daemon/main.cpp               Headless daemon entry point
+  main.cpp                      Standalone GUI (fallback for non-Plasma)
+  airpods_packets.h             AAP protocol definitions
+  deviceinfo.hpp                Device state model
+  battery.hpp                   Battery state model
+  ble/                          BLE scanning
+  media/                        MPRIS + PulseAudio
+
+plasmoid/
+  metadata.json                 Plasma 6 widget metadata
+  contents/ui/                  QML widget files
+
+data/
+  linuxpods-daemon.service      Systemd user service
+  me.kavishdevar.linuxpods.service  D-Bus activation
+```
+
+## Packages
+
+The RPM spec produces two packages:
+
+| Package | Contents |
+|---------|----------|
+| `linuxpods` | Daemon, CLI, D-Bus service, systemd unit |
+| `linuxpods-plasmoid` | KDE Plasma 6 system tray widget |
+
+## License
+
+**GPL-3.0-or-later**
+
+Based on [LibrePods](https://github.com/kavishdevar/librepods) by kavishdevar.

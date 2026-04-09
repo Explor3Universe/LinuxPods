@@ -1,0 +1,99 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+ "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node>
+  <interface name="me.kavishdevar.linuxpods.Manager">
+
+    <!-- Connection state -->
+    <property name="Connected" type="b" access="read"/>
+    <property name="DeviceName" type="s" access="read"/>
+    <property name="DeviceModel" type="s" access="read"/>
+    <property name="BluetoothAddress" type="s" access="read"/>
+
+    <!-- Battery: left pod -->
+    <property name="LeftBatteryLevel" type="y" access="read"/>
+    <property name="LeftBatteryCharging" type="b" access="read"/>
+    <property name="LeftBatteryAvailable" type="b" access="read"/>
+    <!-- Battery: right pod -->
+    <property name="RightBatteryLevel" type="y" access="read"/>
+    <property name="RightBatteryCharging" type="b" access="read"/>
+    <property name="RightBatteryAvailable" type="b" access="read"/>
+    <!-- Battery: case -->
+    <property name="CaseBatteryLevel" type="y" access="read"/>
+    <property name="CaseBatteryCharging" type="b" access="read"/>
+    <property name="CaseBatteryAvailable" type="b" access="read"/>
+    <!-- Battery: headset (AirPods Max) -->
+    <property name="HeadsetBatteryLevel" type="y" access="read"/>
+    <property name="HeadsetBatteryCharging" type="b" access="read"/>
+    <property name="HeadsetBatteryAvailable" type="b" access="read"/>
+
+    <!-- Ear detection -->
+    <property name="LeftPodInEar" type="b" access="read"/>
+    <property name="RightPodInEar" type="b" access="read"/>
+
+    <!-- Noise control: 0=Off, 1=ANC, 2=Transparency, 3=Adaptive -->
+    <property name="NoiseControlMode" type="i" access="read"/>
+    <property name="AdaptiveNoiseLevel" type="i" access="read"/>
+
+    <!-- Feature toggles -->
+    <property name="ConversationalAwareness" type="b" access="read"/>
+    <property name="HearingAidEnabled" type="b" access="read"/>
+    <property name="OneBudANCMode" type="b" access="read"/>
+
+    <!-- Settings -->
+    <property name="EarDetectionBehavior" type="i" access="read"/>
+    <property name="NotificationsEnabled" type="b" access="read"/>
+    <property name="AutoStartEnabled" type="b" access="read"/>
+    <property name="RetryAttempts" type="i" access="read"/>
+    <property name="CrossDeviceEnabled" type="b" access="read"/>
+
+    <!-- Magic Cloud Keys (hex strings) -->
+    <property name="MagicAccIRK" type="s" access="read"/>
+    <property name="MagicAccEncKey" type="s" access="read"/>
+
+    <!-- Commands -->
+    <method name="SetNoiseControlMode">
+      <arg name="mode" type="i" direction="in"/>
+    </method>
+    <method name="SetAdaptiveNoiseLevel">
+      <arg name="level" type="i" direction="in"/>
+    </method>
+    <method name="SetConversationalAwareness">
+      <arg name="enabled" type="b" direction="in"/>
+    </method>
+    <method name="SetHearingAidEnabled">
+      <arg name="enabled" type="b" direction="in"/>
+    </method>
+    <method name="SetOneBudANCMode">
+      <arg name="enabled" type="b" direction="in"/>
+    </method>
+    <method name="SetEarDetectionBehavior">
+      <arg name="behavior" type="i" direction="in"/>
+    </method>
+    <method name="SetNotificationsEnabled">
+      <arg name="enabled" type="b" direction="in"/>
+    </method>
+    <method name="SetAutoStartEnabled">
+      <arg name="enabled" type="b" direction="in"/>
+    </method>
+    <method name="SetRetryAttempts">
+      <arg name="attempts" type="i" direction="in"/>
+    </method>
+    <method name="SetCrossDeviceEnabled">
+      <arg name="enabled" type="b" direction="in"/>
+    </method>
+    <method name="RenameDevice">
+      <arg name="name" type="s" direction="in"/>
+    </method>
+    <method name="SetPhoneMac">
+      <arg name="mac" type="s" direction="in"/>
+    </method>
+    <method name="RequestMagicCloudKeys"/>
+
+    <!-- Explicit signals (beyond PropertiesChanged) -->
+    <signal name="DeviceConnected">
+      <arg name="name" type="s"/>
+    </signal>
+    <signal name="DeviceDisconnected"/>
+
+  </interface>
+</node>

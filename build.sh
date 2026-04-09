@@ -47,11 +47,13 @@ mkdir -p "$TOPDIR"/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
 mkdir -p "$OUTDIR"
 
 echo ">>> Building source tarball from $SRC_DIR"
-# Pack src/* into ${NAME}-${VERSION}/* using --transform.
+# Pack src/*, plasmoid/*, data/* into ${NAME}-${VERSION}/* using --transform.
 tar czf "$TOPDIR/SOURCES/$TARBALL" \
     --transform="s|^src|${NAME}-${VERSION}|" \
+    --transform="s|^plasmoid|${NAME}-${VERSION}/plasmoid|" \
+    --transform="s|^data|${NAME}-${VERSION}/data|" \
     -C "$SCRIPT_DIR" \
-    src
+    src plasmoid data
 
 # Include the LICENSE and README at the top level of the tarball so the
 # spec can pick them up via %license and %doc.

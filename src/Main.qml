@@ -26,22 +26,25 @@ ApplicationWindow {
     // from C++).
     visible: false
     width: 360
-    height: 540
+    height: 600
     minimumWidth: 340
-    minimumHeight: 480
+    minimumHeight: 560
     maximumWidth: 400
-    maximumHeight: 620
+    maximumHeight: 700
     title: "LinuxPods"
     objectName: "mainWindowObject"
     color: "transparent"
 
     // Frameless dropdown / "shutter from the top panel" behaviour.
-    // No Qt.Tool — that flag blocks focus on Wayland/X11, which kills both
-    // requestActivate() and the auto-hide-on-focus-lost logic.
-    flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
+    // `Qt.Popup` looked closer to a native quick-settings panel, but on
+    // Plasma/Wayland it can refuse to map at all for this top-level window.
+    // Keep the window frameless and above normal windows, then position it
+    // manually near the tray click target.
+    flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.NoDropShadowWindowHint
 
     property bool _hadFocus: false
     property bool _autoHide: Qt.application.arguments.indexOf("--no-autohide") === -1
+    property bool _hideInProgress: false
     // Show on startup only when explicitly told via --no-autohide or
     // a sub-page deeplink. The default daemon mode (--hide) keeps the
     // popup invisible until C++ reopen() is invoked.
@@ -52,28 +55,106 @@ ApplicationWindow {
     // will NOT trigger auto-hide (avoids the popup vanishing the instant
     // the spawning bash / spectacle process steals focus).
     property bool _autoHideArmed: false
+    property int _slideDistance: 120
+    property real _panelSlideOffset: -_slideDistance
+    property real _panelOpacity: 0.0
 
+    Behavior on _panelSlideOffset {
+        NumberAnimation { duration: 220; easing.type: Easing.OutCubic }
+    }
 
-    // Show the popup. We do NOT try to set x/y manually — Wayland
-    // compositors (KWin) ignore client-side positioning for normal
-    // top-level windows. Instead we let KStatusNotifierItem +
-    // KWin handle placement; on KDE Plasma 6 this anchors the window
-    // to the tray icon automatically because we registered it via
-    // setAssociatedWindow() in C++.
+    Behavior on _panelOpacity {
+        NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+    }
+
+    function resolveScreen(anchorX, anchorY) {
+        const screens = Qt.application.screens || [];
+        for (let i = 0; i < screens.length; ++i) {
+            const screen = screens[i];
+            if (anchorX >= screen.virtualX && anchorX <= screen.virtualX + screen.width
+                && anchorY >= screen.virtualY && anchorY <= screen.virtualY + screen.height) {
+                return screen;
+            }
+        }
+
+        return Qt.application.primaryScreen || screens[0];
+    }
+
+    function positionFallback(anchorX, anchorY) {
+        const screen = resolveScreen(anchorX, anchorY);
+        if (!screen) {
+            return;
+        }
+
+        const margin = 16;
+        const topPadding = 12;
+        const preferredX = anchorX >= 0
+            ? anchorX - mainWindow.width + margin
+            : screen.virtualX + screen.width - mainWindow.width - margin;
+
+        mainWindow.x = Math.max(screen.virtualX + margin,
+                                Math.min(preferredX, screen.virtualX + screen.width - mainWindow.width - margin));
+        mainWindow.y = anchorY >= 0 ? anchorY + topPadding : screen.virtualY + 40;
+    }
+
+    function anchorToTray(anchorX, anchorY) {
+        positionFallback(anchorX, anchorY);
+    }
+
+    function beginShowAnimation() {
+        hideTimer.stop();
+        _hideInProgress = false;
+        _panelSlideOffset = -_slideDistance;
+        _panelOpacity = 0.0;
+
+        Qt.callLater(() => {
+            if (!mainWindow.visible) {
+                return;
+            }
+
+            mainWindow.raise();
+            mainWindow.requestActivate();
+            mainWindow._panelSlideOffset = 0;
+            mainWindow._panelOpacity = 1.0;
+            armAutoHideTimer.restart();
+        });
+    }
+
     function showFromTopPanel(anchorX, anchorY) {
-        mainWindow.visible = true;
-        mainWindow.raise();
-        mainWindow.requestActivate();
+        positionFallback(anchorX, anchorY);
+        if (!mainWindow.visible) {
+            mainWindow.show();
+        } else {
+            mainWindow.raise();
+            mainWindow.requestActivate();
+        }
     }
 
     function hideToTopPanel() {
-        mainWindow.visible = false;
+        if (!mainWindow.visible || mainWindow._hideInProgress) {
+            return;
+        }
+
+        mainWindow._hideInProgress = true;
+        mainWindow._autoHideArmed = false;
+        mainWindow._panelSlideOffset = -mainWindow._slideDistance;
+        mainWindow._panelOpacity = 0.0;
+        hideTimer.restart();
     }
 
     Timer {
         id: armAutoHideTimer
         interval: 800
         onTriggered: mainWindow._autoHideArmed = true
+    }
+
+    Timer {
+        id: hideTimer
+        interval: 240
+        onTriggered: {
+            mainWindow._hideInProgress = false;
+            airPodsTrayApp.hidePopupWindow();
+        }
     }
 
     Component.onCompleted: {
@@ -86,23 +167,43 @@ ApplicationWindow {
     onActiveChanged: {
         if (active) {
             _hadFocus = true;
-        } else if (_autoHide && _autoHideArmed && _hadFocus && visible) {
+        } else if (_autoHide && _autoHideArmed && _hadFocus && visible && !_hideInProgress) {
             hideToTopPanel();
             _hadFocus = false;
-            _autoHideArmed = false;
         }
     }
 
-    // ── Stitch dark gradient background ───────────────────────────────
-    background: Rectangle {
-        gradient: Gradient {
-            GradientStop { position: 0.0; color: "#1a1c24" }
-            GradientStop { position: 0.35; color: "#0e0e0e" }
-            GradientStop { position: 1.0; color: "#000000" }
+    onVisibleChanged: {
+        if (visible) {
+            _hadFocus = false;
+            _autoHideArmed = false;
+            beginShowAnimation();
+        } else {
+            _hadFocus = false;
+            _autoHideArmed = false;
+            _hideInProgress = false;
+            _panelSlideOffset = -_slideDistance;
+            _panelOpacity = 0.0;
         }
+    }
+
+    background: Rectangle {
+        color: "transparent"
     }
 
     onClosing: mainWindow.visible = false
+
+    function preparePage(pageToLoad) {
+        if (pageToLoad === "settings") {
+            if (stackView.depth === 1) {
+                stackView.push(settingsPage)
+            }
+        } else {
+            if (stackView.depth > 1) {
+                stackView.pop()
+            }
+        }
+    }
 
     // Called from C++ when the user clicks the tray icon.
     // anchorX/anchorY are the global screen coordinates of the click on the
@@ -113,15 +214,7 @@ ApplicationWindow {
         console.error("[LinuxPods] reopen pageToLoad=" + pageToLoad
                       + " anchor=(" + anchorX + "," + anchorY + ")"
                       + " visible=" + mainWindow.visible);
-        if (pageToLoad === "settings") {
-            if (stackView.depth === 1) {
-                stackView.push(settingsPage)
-            }
-        } else {
-            if (stackView.depth > 1) {
-                stackView.pop()
-            }
-        }
+        preparePage(pageToLoad)
 
         if (mainWindow.visible) {
             // Toggle behaviour: clicking the tray icon while visible hides
@@ -134,29 +227,44 @@ ApplicationWindow {
                          anchorY === undefined ? -1 : anchorY);
     }
 
-    MouseArea {
+    Rectangle {
+        id: panelShell
         anchors.fill: parent
-        acceptedButtons: Qt.BackButton | Qt.ForwardButton
-        onClicked: (mouse) => {
-            if (mouse.button === Qt.BackButton && stackView.depth > 1) {
-                stackView.pop()
+        y: mainWindow._panelSlideOffset
+        opacity: mainWindow._panelOpacity
+        radius: 24
+        clip: true
+        antialiasing: true
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: "#1a1c24" }
+            GradientStop { position: 0.35; color: "#0e0e0e" }
+            GradientStop { position: 1.0; color: "#000000" }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.BackButton | Qt.ForwardButton
+            onClicked: (mouse) => {
+                if (mouse.button === Qt.BackButton && stackView.depth > 1) {
+                    stackView.pop()
+                }
             }
         }
-    }
 
-    StackView {
-        id: stackView
-        anchors.fill: parent
-        initialItem: mainPage
+        StackView {
+            id: stackView
+            anchors.fill: parent
+            initialItem: mainPage
 
-        // Allow opening directly on a sub-page from the CLI:
-        //   librepods --settings    or    librepods --hearing
-        Component.onCompleted: {
-            const args = Qt.application.arguments;
-            if (args.indexOf("--settings") !== -1) {
-                stackView.push(settingsPage);
-            } else if (args.indexOf("--hearing") !== -1) {
-                stackView.push(hearingAidPage);
+            // Allow opening directly on a sub-page from the CLI:
+            //   librepods --settings    or    librepods --hearing
+            Component.onCompleted: {
+                const args = Qt.application.arguments;
+                if (args.indexOf("--settings") !== -1) {
+                    stackView.push(settingsPage);
+                } else if (args.indexOf("--hearing") !== -1) {
+                    stackView.push(hearingAidPage);
+                }
             }
         }
     }
