@@ -171,6 +171,8 @@ if(DATA_DIR)
         DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/dbus-1/services")
     install(FILES "${DATA_DIR}/linuxpods-daemon.service"
         DESTINATION "/usr/lib/systemd/user")
+    install(FILES "${DATA_DIR}/90-linuxpods.preset"
+        DESTINATION "/usr/lib/systemd/user-preset")
 endif()
 
 # ── Plasma 6 plasmoid ───────────────────────────────────────────────

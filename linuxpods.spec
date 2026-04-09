@@ -84,6 +84,7 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/me.kavishdevar
 %{_datadir}/icons/hicolor/scalable/apps/librepods.svg
 %{_datadir}/dbus-1/services/me.kavishdevar.linuxpods.service
 %{_userunitdir}/linuxpods-daemon.service
+%{_userpresetdir}/90-linuxpods.preset
 %{_metainfodir}/me.kavishdevar.linuxpods.metainfo.xml
 %{_datadir}/librepods/translations/librepods_tr.qm
 
