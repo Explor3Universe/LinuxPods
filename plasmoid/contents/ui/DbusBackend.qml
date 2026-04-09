@@ -107,8 +107,16 @@ Item {
                 backend._ok = false;
                 return;
             }
-            backend._d = backend._parse(out);
-            backend._ok = Object.keys(backend._d).length > 0;
+            let newData = backend._parse(out);
+            // Only replace _d if values actually changed (avoids re-firing all bindings)
+            let changed = Object.keys(newData).length !== Object.keys(backend._d).length;
+            if (!changed) {
+                for (let k in newData) {
+                    if (backend._d[k] !== newData[k]) { changed = true; break; }
+                }
+            }
+            if (changed) backend._d = newData;
+            backend._ok = Object.keys(newData).length > 0;
         }
     }
 

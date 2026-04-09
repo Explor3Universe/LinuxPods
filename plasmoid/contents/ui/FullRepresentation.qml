@@ -10,11 +10,11 @@ ColumnLayout {
     // Access the global backend from PlasmoidItem (main.qml)
     readonly property var b: root.backend
 
-    Layout.minimumWidth: Kirigami.Units.gridUnit * 22
-    Layout.minimumHeight: Kirigami.Units.gridUnit * 55
-    Layout.preferredWidth: Kirigami.Units.gridUnit * 24
-    Layout.preferredHeight: Kirigami.Units.gridUnit * 60
-    Layout.maximumHeight: Kirigami.Units.gridUnit * 65
+    Layout.minimumWidth: Kirigami.Units.gridUnit * 20
+    Layout.minimumHeight: Kirigami.Units.gridUnit * 24
+    Layout.preferredWidth: Kirigami.Units.gridUnit * 22
+    Layout.preferredHeight: Kirigami.Units.gridUnit * 30
+    Layout.maximumHeight: Kirigami.Units.gridUnit * 40
 
     spacing: 0
 
@@ -195,11 +195,11 @@ ColumnLayout {
                 Kirigami.Heading { text: i18n("Features"); level: 5; opacity: 0.6; Layout.bottomMargin: Kirigami.Units.smallSpacing }
 
                 Kirigami.Separator { Layout.fillWidth: true }
-                FeatureRow { text: i18n("Conversational Awareness"); checked: fullRep.b ? fullRep.b.conversationalAwareness : false; onToggled: fullRep.b.setCA(checked) }
+                FeatureRow { text: i18n("Conversational Awareness"); checked: fullRep.b ? fullRep.b.conversationalAwareness : false; onToggled: { if (fullRep.b) fullRep.b.setCA(checked) } }
                 Kirigami.Separator { Layout.fillWidth: true }
-                FeatureRow { text: i18n("Hearing Aid"); checked: fullRep.b ? fullRep.b.hearingAid : false; onToggled: fullRep.b.setHA(checked) }
+                FeatureRow { text: i18n("Hearing Aid"); checked: fullRep.b ? fullRep.b.hearingAid : false; onToggled: { if (fullRep.b) fullRep.b.setHA(checked) } }
                 Kirigami.Separator { Layout.fillWidth: true }
-                FeatureRow { text: i18n("One Bud ANC"); checked: fullRep.b ? fullRep.b.oneBudANC : false; onToggled: fullRep.b.set1Bud(checked) }
+                FeatureRow { text: i18n("One Bud ANC"); checked: fullRep.b ? fullRep.b.oneBudANC : false; onToggled: { if (fullRep.b) fullRep.b.set1Bud(checked) } }
             }
 
             // ── Settings ────────────────────────────────────────

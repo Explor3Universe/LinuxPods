@@ -276,12 +276,12 @@ int main(int argc, char *argv[])
     }
 
     // ── Single-instance check ───────────────────────────────────────
-    QLocalServer::removeServer("app_server");
+    QLocalServer::removeServer("linuxpods-gui");
     QFile stale("/tmp/app_server");
     if (stale.exists()) stale.remove();
 
     QLocalSocket socketCheck;
-    socketCheck.connectToServer("app_server");
+    socketCheck.connectToServer("linuxpods-gui");
     if (socketCheck.waitForConnected(300))
     {
         LOG_INFO("Another instance already running! Reopening window...");
@@ -333,8 +333,8 @@ int main(int argc, char *argv[])
 
     // ── Local server for single-instance and CLI commands ────────────
     QLocalServer server;
-    QLocalServer::removeServer("app_server");
-    if (!server.listen("app_server"))
+    QLocalServer::removeServer("linuxpods-gui");
+    if (!server.listen("linuxpods-gui"))
     {
         LOG_ERROR("Unable to start listening server");
     }
@@ -361,7 +361,7 @@ int main(int argc, char *argv[])
 
     QObject::connect(&app, &QCoreApplication::aboutToQuit, [&]() {
         if (server.isListening()) server.close();
-        QLocalServer::removeServer("app_server");
+        QLocalServer::removeServer("linuxpods-gui");
         QFile staleFile("/tmp/app_server");
         if (staleFile.exists()) staleFile.remove();
     });

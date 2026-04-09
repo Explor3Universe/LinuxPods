@@ -144,7 +144,6 @@ private:
     bool m_debugMode;
     QSettings *m_settings;
     DeviceInfo *m_deviceInfo;
-    Battery *m_battery;  // alias for m_deviceInfo->getBattery()
     AutoStartManager *m_autoStartManager;
 
     // Bluetooth

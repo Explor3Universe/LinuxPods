@@ -14,20 +14,16 @@ Q_LOGGING_CATEGORY(librepods, "librepods")
 
 // Headless daemon entry point for LinuxPods.
 //
-// Runs without any GUI (QCoreApplication, not QApplication).
+// Runs without any GUI (QCoreApplication).
 // Provides:
 //   - AirPods protocol, BLE scanning, media integration
 //   - D-Bus service at me.kavishdevar.linuxpods
 //   - QLocalServer for CLI commands (librepods-ctl)
-//   - KStatusNotifierItem for basic tray icon (fallback for non-Plasma DE)
 //
 // On Plasma, the plasmoid talks to this daemon over D-Bus.
-// On GNOME/XFCE/Sway, the SNI tray icon + context menu provide basic control.
 
 int main(int argc, char *argv[])
 {
-    // KStatusNotifierItem requires QApplication for icon rendering.
-    // Use QApplication to support SNI fallback tray icon.
     QCoreApplication app(argc, argv);
     app.setApplicationName(QStringLiteral("linuxpods-daemon"));
     app.setOrganizationName(QStringLiteral("AirPodsTrayApp"));
@@ -59,12 +55,12 @@ int main(int argc, char *argv[])
     }
 
     // ── Single-instance check ───────────────────────────────────────
-    QLocalServer::removeServer("app_server");
+    QLocalServer::removeServer("linuxpods-daemon");
     QFile stale("/tmp/app_server");
     if (stale.exists()) stale.remove();
 
     QLocalSocket socketCheck;
-    socketCheck.connectToServer("app_server");
+    socketCheck.connectToServer("linuxpods-daemon");
     if (socketCheck.waitForConnected(300))
     {
         LOG_INFO("Another instance already running, exiting.");
@@ -83,8 +79,8 @@ int main(int argc, char *argv[])
 
     // ── Local server for CLI commands (librepods-ctl) ────────────────
     QLocalServer server;
-    QLocalServer::removeServer("app_server");
-    if (!server.listen("app_server"))
+    QLocalServer::removeServer("linuxpods-daemon");
+    if (!server.listen("linuxpods-daemon"))
     {
         LOG_ERROR("Unable to start CLI listening server: " << server.errorString());
     }
@@ -109,11 +105,12 @@ int main(int argc, char *argv[])
                 LOG_ERROR("Unknown CLI message: " << msg);
             sock->disconnectFromServer();
         });
+        QObject::connect(sock, &QLocalSocket::disconnected, sock, &QLocalSocket::deleteLater);
     });
 
     QObject::connect(&app, &QCoreApplication::aboutToQuit, [&]() {
         if (server.isListening()) server.close();
-        QLocalServer::removeServer("app_server");
+        QLocalServer::removeServer("linuxpods-daemon");
         QFile staleFile("/tmp/app_server");
         if (staleFile.exists()) staleFile.remove();
     });

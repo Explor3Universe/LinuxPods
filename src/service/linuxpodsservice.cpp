@@ -68,8 +68,8 @@ LinuxPodsService::~LinuxPodsService()
 {
     saveCrossDeviceEnabled();
     saveEarDetectionSettings();
-    delete m_socket;
-    delete m_phoneSocket;
+    if (m_socket) { m_socket->close(); m_socket = nullptr; }
+    if (m_phoneSocket) { m_phoneSocket->close(); m_phoneSocket = nullptr; }
 }
 
 void LinuxPodsService::initialize()
@@ -446,25 +446,25 @@ void LinuxPodsService::connectToDevice(const QBluetoothDeviceInfo &device)
     m_socket = sock;
 
     // ── Connected handler ───────────────────────────────────────────
-    connect(sock, &QBluetoothSocket::connected, this, [this, sock]() {
+    connect(sock, &QBluetoothSocket::connected, this, [this]() {
         LOG_INFO("[connect] Socket connected, sending handshake");
-        m_retryCount = 0;  // reset on success
+        m_retryCount = 0;
 
-        connect(sock, &QBluetoothSocket::readyRead, this, [this, sock]() {
-            QByteArray data = sock->readAll();
+        if (!m_socket) return;
+
+        connect(m_socket, &QBluetoothSocket::readyRead, this, [this]() {
+            if (!m_socket) return;
+            QByteArray data = m_socket->readAll();
             QMetaObject::invokeMethod(this, [this, data]() { parseData(data); },
                                       Qt::QueuedConnection);
             QMetaObject::invokeMethod(this, [this, data]() { relayPacketToPhone(data); },
                                       Qt::QueuedConnection);
         });
 
-        // ── Disconnected handler (socket closed by remote) ──────
-        connect(sock, &QBluetoothSocket::disconnected, this, [this]() {
+        connect(m_socket, &QBluetoothSocket::disconnected, this, [this]() {
             LOG_WARN("[connect] Socket disconnected by remote");
             if (m_socket)
-            {
                 handleDeviceDisconnected(QBluetoothAddress(m_deviceInfo->bluetoothAddress()));
-            }
         });
 
         sendHandshake();
@@ -695,6 +695,13 @@ void LinuxPodsService::connectToPhone()
         return;
     }
 
+    // Clean up stale non-open socket
+    if (m_phoneSocket)
+    {
+        m_phoneSocket->deleteLater();
+        m_phoneSocket = nullptr;
+    }
+
     QBluetoothAddress phoneAddress("00:00:00:00:00:00");
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     if (!env.value("PHONE_MAC_ADDRESS").isEmpty())
@@ -710,10 +717,15 @@ void LinuxPodsService::connectToPhone()
         if (!m_lastEarDetectionStatus.isEmpty())
             m_phoneSocket->write(m_lastEarDetectionStatus);
     });
+    connect(m_phoneSocket, &QBluetoothSocket::readyRead, this, [this]() {
+        if (m_phoneSocket)
+            handlePhonePacket(m_phoneSocket->readAll());
+    });
     connect(m_phoneSocket,
             QOverload<QBluetoothSocket::SocketError>::of(&QBluetoothSocket::errorOccurred),
             this, [this](QBluetoothSocket::SocketError error) {
-                LOG_ERROR("Phone socket error: " << error << ", " << m_phoneSocket->errorString());
+                LOG_ERROR("Phone socket error: " << error);
+                if (m_phoneSocket) { m_phoneSocket->deleteLater(); m_phoneSocket = nullptr; }
             });
 
     m_phoneSocket->connectToService(

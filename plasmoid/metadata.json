@@ -14,12 +14,10 @@
         "Id": "me.kavishdevar.linuxpods",
         "License": "GPL-3.0-or-later",
         "Name": "LinuxPods",
-        "Version": "0.1.0"
+        "Version": "0.2.0"
     },
-    "X-Plasma-API": "declarativeappletscript",
     "X-Plasma-API-Minimum-Version": "6.0",
     "X-Plasma-MainScript": "ui/main.qml",
     "X-Plasma-NotificationArea": "true",
-    "X-Plasma-NotificationAreaCategory": "Hardware",
-    "X-Plasma-DBusActivationService": "me.kavishdevar.linuxpods"
+    "X-Plasma-NotificationAreaCategory": "Hardware"
 }

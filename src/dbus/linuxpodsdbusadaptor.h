@@ -113,7 +113,7 @@ public:
             // Queue — we'll get the name when the old owner exits.
             bus.interface()->call(QStringLiteral("RequestName"),
                                   QStringLiteral("me.kavishdevar.linuxpods"),
-                                  (uint)4 /* DBUS_NAME_FLAG_DO_NOT_QUEUE=0, just queue */);
+                                  (uint)0 /* no flags = queue for ownership */);
         }
         LOG_INFO("D-Bus: registered me.kavishdevar.linuxpods on session bus");
         return true;
