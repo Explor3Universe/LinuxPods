@@ -147,6 +147,8 @@ install(FILES assets/me.kavishdevar.librepods.desktop
     DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/applications")
 install(FILES assets/librepods.svg
     DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/scalable/apps")
+install(FILES assets/me.kavishdevar.linuxpods.metainfo.xml
+    DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/metainfo")
 
 # Locate data/ and plasmoid/ directories.
 # When building locally with `cmake -S src -B build`, they are at ../data.

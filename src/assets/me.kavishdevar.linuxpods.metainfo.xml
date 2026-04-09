@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>me.kavishdevar.linuxpods</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+
+  <name>LinuxPods</name>
+  <summary>AirPods control and battery monitor for Linux</summary>
+
+  <description>
+    <p>
+      LinuxPods is a native Linux application that unlocks Apple AirPods
+      features on non-Apple devices. It communicates with AirPods via the
+      reverse-engineered Apple Accessory Protocol (AAP) over Bluetooth L2CAP.
+    </p>
+    <p>Features include:</p>
+    <ul>
+      <li>Battery monitoring for left earbud, right earbud, and charging case</li>
+      <li>Noise control: Active Noise Cancellation, Transparency, Adaptive, Off</li>
+      <li>Ear detection with automatic media pause/play</li>
+      <li>Conversational Awareness</li>
+      <li>Native KDE Plasma 6 system tray integration</li>
+      <li>D-Bus API for scripting and automation</li>
+    </ul>
+  </description>
+
+  <url type="homepage">https://github.com/Puerh0x1/LinuxPods</url>
+  <url type="bugtracker">https://github.com/Puerh0x1/LinuxPods/issues</url>
+
+  <launchable type="desktop-id">me.kavishdevar.librepods.desktop</launchable>
+
+  <provides>
+    <dbus type="session">me.kavishdevar.linuxpods</dbus>
+    <binary>linuxpods-daemon</binary>
+    <binary>librepods-ctl</binary>
+  </provides>
+
+  <content_rating type="oars-1.1" />
+
+  <releases>
+    <release version="0.2.0" date="2026-04-09">
+      <description>
+        <p>Architecture split: headless daemon with D-Bus API and native KDE Plasma 6 system tray plasmoid.</p>
+      </description>
+    </release>
+  </releases>
+</component>
