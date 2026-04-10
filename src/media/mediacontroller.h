@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #ifndef MEDIACONTROLLER_H
 #define MEDIACONTROLLER_H
 

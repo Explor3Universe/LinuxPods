@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #ifndef SYSTEMSLEEPMONITOR_HPP
 #define SYSTEMSLEEPMONITOR_HPP
 

@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+
 # LinuxPods
 
 Native AirPods integration for Linux. Battery monitoring, noise control, ear detection, and more — as a native KDE Plasma 6 system tray widget.

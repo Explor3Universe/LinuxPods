@@ -1,0 +1,56 @@
+.\" SPDX-License-Identifier: GPL-3.0-or-later
+.TH LINUXPODS-DAEMON 1 "April 2026" "linuxpods 0.2.0" "User Commands"
+.SH NAME
+linuxpods-daemon \- headless AirPods management daemon
+.SH SYNOPSIS
+.B linuxpods-daemon
+.RI [ OPTIONS ]
+.SH DESCRIPTION
+.B linuxpods-daemon
+is a headless background service that manages Apple AirPods on Linux
+through the reverse-engineered Apple Accessory Protocol (AAP) over
+Bluetooth L2CAP. It handles device discovery, connection,
+battery reporting, noise-control mode switching, ear detection, media
+integration (PulseAudio and MPRIS), and the BLE proximity advertising
+used by AirPods for pairing.
+.PP
+The daemon exposes a session D-Bus interface at
+.I me.kavishdevar.linuxpods
+on the
+.I /me/kavishdevar/linuxpods
+object path, used by front-ends such as the LinuxPods Plasma 6 tray
+widget and the
+.BR librepods-ctl (1)
+command-line tool.
+.PP
+It is intended to be started automatically by the user systemd instance
+via
+.I linuxpods-daemon.service
+or by D-Bus session activation and generally should not be invoked
+directly.
+.SH OPTIONS
+.TP
+.B \-\-debug
+Enable verbose debug logging to standard error.
+.TP
+.B \-h , \-\-help
+Print a short help message and exit.
+.SH FILES
+.TP
+.I ~/.config/AirPodsTrayApp/AirPodsTrayApp.conf
+Per-user settings store (device address, behaviour toggles).
+.TP
+.I /usr/lib/systemd/user/linuxpods-daemon.service
+Systemd user unit used to start the daemon on login.
+.TP
+.I /usr/share/dbus-1/services/me.kavishdevar.linuxpods.service
+D-Bus session activation file.
+.SH SEE ALSO
+.BR librepods (1),
+.BR librepods-ctl (1),
+.BR bluetoothctl (1),
+.BR systemctl (1)
+.SH BUGS
+Report issues at
+.UR https://github.com/Puerh0x1/LinuxPods/issues
+.UE .

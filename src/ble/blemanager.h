@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #ifndef BLEMANAGER_H
 #define BLEMANAGER_H
 

@@ -75,6 +75,11 @@ tar rzf "$TOPDIR/SOURCES/$TARBALL" -C "$TMP_EXTRA" "${NAME}-${VERSION}/LICENSE" 
 echo ">>> Tarball:"
 ls -la "$TOPDIR/SOURCES/$TARBALL"
 
+# Source1 — rpmlintrc filter file consumed by rpmlint during review.
+if [[ -f "$SCRIPT_DIR/${NAME}.rpmlintrc" ]]; then
+    cp "$SCRIPT_DIR/${NAME}.rpmlintrc" "$TOPDIR/SOURCES/"
+fi
+
 cp "$SPEC" "$TOPDIR/SPECS/"
 
 if [[ $SKIP_DEPS -eq 0 ]]; then

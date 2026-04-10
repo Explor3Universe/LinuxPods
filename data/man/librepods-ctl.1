@@ -1,0 +1,55 @@
+.\" SPDX-License-Identifier: GPL-3.0-or-later
+.TH LIBREPODS-CTL 1 "April 2026" "linuxpods 0.2.0" "User Commands"
+.SH NAME
+librepods-ctl \- command-line control tool for LinuxPods
+.SH SYNOPSIS
+.B librepods-ctl
+.I COMMAND
+.RI [ ARGS... ]
+.SH DESCRIPTION
+.B librepods-ctl
+is a small command-line client that talks to a running
+.BR linuxpods-daemon (1)
+over D-Bus. It is intended for scripting, debugging and headless use
+where neither the standalone
+.BR librepods (1)
+GUI nor the Plasma 6 widget are available.
+.PP
+All commands operate on the currently-connected AirPods device.
+.SH COMMANDS
+.TP
+.B status
+Print the current device name, battery levels (left earbud, right
+earbud, case), noise-control mode, and ear-detection state.
+.TP
+.B noise \fIMODE\fR
+Set the noise-control mode. \fIMODE\fR must be one of
+.BR off ,
+.BR anc ,
+.BR transparency ,
+or
+.BR adaptive .
+.TP
+.B ca \fBon\fR|\fBoff\fR
+Enable or disable Conversational Awareness.
+.TP
+.B battery
+Print battery levels as machine-readable \fIkey=value\fR lines.
+.TP
+.B connect
+Attempt to (re)connect to the last-known device.
+.TP
+.B disconnect
+Disconnect from the current device.
+.SH EXIT STATUS
+.B librepods-ctl
+exits with status 0 on success and non-zero on failure (no device, D-Bus
+error, invalid argument).
+.SH SEE ALSO
+.BR linuxpods-daemon (1),
+.BR librepods (1),
+.BR busctl (1)
+.SH BUGS
+Report issues at
+.UR https://github.com/Puerh0x1/LinuxPods/issues
+.UE .

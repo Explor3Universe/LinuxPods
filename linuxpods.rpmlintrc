@@ -1,0 +1,11 @@
+# Filters for legitimate project-name and upstream-specific false positives.
+# Each filter targets a specific rpmlint warning; do not broaden without cause.
+
+# Project / binary / technology names that rpmlint's English dictionary does
+# not know but which are not misspellings:
+#   linuxpods, librepods    — upstream project name
+#   ctl                     — conventional control-tool suffix
+#   plasmoid                — KDE term for a Plasma widget
+#   systemd                 — service manager
+#   backend                 — software architecture term
+addFilter(r"spelling-error.*(linuxpods|librepods|ctl|plasmoid|systemd|backend)")

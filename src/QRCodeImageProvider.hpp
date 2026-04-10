@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #include <QQuickImageProvider>
 #include <QPainter>
 #include "thirdparty/QR-Code-generator/qrcodegen.hpp"

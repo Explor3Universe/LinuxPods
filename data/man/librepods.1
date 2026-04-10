@@ -1,0 +1,40 @@
+.\" SPDX-License-Identifier: GPL-3.0-or-later
+.TH LIBREPODS 1 "April 2026" "linuxpods 0.2.0" "User Commands"
+.SH NAME
+librepods \- standalone Qt GUI for AirPods management
+.SH SYNOPSIS
+.B librepods
+.RI [ OPTIONS ]
+.SH DESCRIPTION
+.B librepods
+is a standalone Qt6 + QML graphical front-end for managing Apple
+AirPods on Linux. It bundles the same backend used by
+.BR linuxpods-daemon (1)
+together with a QML user interface and a
+.B KStatusNotifierItem
+tray icon, and is intended for desktop environments that do not provide
+the native LinuxPods Plasma 6 widget.
+.PP
+On KDE Plasma 6 users should prefer the
+.B linuxpods-plasmoid
+package together with
+.BR linuxpods-daemon (1),
+which offers tighter integration with the Plasma system tray.
+.SH OPTIONS
+.TP
+.B \-\-debug
+Enable verbose debug logging to standard error.
+.TP
+.B \-h , \-\-help
+Print a short help message and exit.
+.SH FILES
+.TP
+.I ~/.config/AirPodsTrayApp/AirPodsTrayApp.conf
+Per-user settings store.
+.SH SEE ALSO
+.BR linuxpods-daemon (1),
+.BR librepods-ctl (1)
+.SH BUGS
+Report issues at
+.UR https://github.com/Puerh0x1/LinuxPods/issues
+.UE .

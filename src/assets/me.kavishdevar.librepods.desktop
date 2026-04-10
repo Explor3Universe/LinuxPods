@@ -1,9 +1,11 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 [Desktop Entry]
 Version=1.0
 Type=Application
 Name=LibrePods
-Comment=AirPods libreated from Apple's ecosystem
+Comment=AirPods liberated from Apple's ecosystem
 Exec=librepods
 Icon=librepods
 Terminal=false
-Categories=Audio;AudioVideo;Utility;Qt;
+Categories=AudioVideo;Utility;Qt;

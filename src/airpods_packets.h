@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // airpods_packets.h
 #ifndef AIRPODS_PACKETS_H
 #define AIRPODS_PACKETS_H
