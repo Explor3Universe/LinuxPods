@@ -25,8 +25,8 @@
     </ul>
   </description>
 
-  <url type="homepage">https://github.com/Puerh0x1/LinuxPods</url>
-  <url type="bugtracker">https://github.com/Puerh0x1/LinuxPods/issues</url>
+  <url type="homepage">https://github.com/Explor3Universe/LinuxPods</url>
+  <url type="bugtracker">https://github.com/Explor3Universe/LinuxPods/issues</url>
 
   <launchable type="desktop-id">me.kavishdevar.librepods.desktop</launchable>
 
@@ -39,9 +39,9 @@
   <content_rating type="oars-1.1" />
 
   <releases>
-    <release version="0.2.0" date="2026-04-09">
+    <release version="1.0.0" date="2026-04-11">
       <description>
-        <p>Architecture split: headless daemon with D-Bus API and native KDE Plasma 6 system tray plasmoid.</p>
+        <p>First tagged upstream release: headless daemon with D-Bus API and native KDE Plasma 6 system tray plasmoid.</p>
       </description>
     </release>
   </releases>

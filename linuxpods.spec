@@ -1,17 +1,11 @@
 Name:           linuxpods
-Version:        0.2.0
-Release:        2%{?dist}
+Version:        1.0.0
+Release:        1%{?dist}
 Summary:        AirPods control daemon and KDE Plasma 6 widget
 
 License:        GPL-3.0-or-later
-URL:            https://github.com/Puerh0x1/LinuxPods
-# The upstream tarball is not currently published on a release page; it is
-# produced from the vendored src/, plasmoid/ and data/ trees of the upstream
-# repository via the ./build.sh helper (see the repository root). To generate
-# it manually:
-#   git clone %%{URL}.git linuxpods-%%{version}
-#   tar czf linuxpods-%%{version}.tar.gz linuxpods-%%{version}
-Source0:        %{URL}/%{name}-%{version}.tar.gz
+URL:            https://github.com/Explor3Universe/LinuxPods
+Source0:        %{URL}/archive/refs/tags/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
 Source1:        %{name}.rpmlintrc
 
 BuildRequires:  cmake >= 3.16
@@ -66,14 +60,18 @@ control, feature toggles, and settings. Communicates with
 linuxpods-daemon over D-Bus.
 
 %prep
-%autosetup -n %{name}-%{version}
+%autosetup -n LinuxPods-%{version}
 
 %build
+pushd src
 %cmake -DLINUXPODS_BUILD_GUI=OFF
 %cmake_build
+popd
 
 %install
+pushd src
 %cmake_install
+popd
 install -Dpm 0644 data/man/linuxpods-daemon.1 %{buildroot}%{_mandir}/man1/linuxpods-daemon.1
 install -Dpm 0644 data/man/librepods-ctl.1    %{buildroot}%{_mandir}/man1/librepods-ctl.1
 
@@ -111,6 +109,18 @@ test -x %{buildroot}%{_bindir}/librepods-ctl
 %{_datadir}/plasma/plasmoids/me.kavishdevar.linuxpods/
 
 %changelog
+* Sat Apr 11 2026 Nick <noreply@github.com> - 1.0.0-1%{?dist}
+- Address second round of Fedora package review feedback (rhbz#2456922):
+  - Fix upstream URL to github.com/Explor3Universe/LinuxPods (the
+    previous github.com/Puerh0x1/LinuxPods reference returned 404)
+  - First tagged upstream release v1.0.0, replacing the untagged
+    0.2.0 placeholder per Fedora Versioning Guidelines
+  - Source0 now fetches the v1.0.0 GitHub archive directly, dropping
+    the manual tarball generation workflow
+  - %%autosetup uses LinuxPods-%%{version}/ to match the GitHub
+    archive's directory name (repository is LinuxPods, not linuxpods)
+  - %%build and %%install push into src/ where CMakeLists.txt lives
+
 * Fri Apr 10 2026 Nick <noreply@github.com> - 0.2.0-2%{?dist}
 - Address Fedora package review feedback (rhbz#2456922):
   - Source0 now uses %%{URL} prefix as required by SourceURL guideline

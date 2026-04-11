@@ -38,7 +38,7 @@ The daemon manages AirPods connections and exposes state over D-Bus. The Plasma 
 ### From RPM (Fedora)
 
 ```bash
-sudo dnf install ./linuxpods-0.2.0-1.fc43.x86_64.rpm ./linuxpods-plasmoid-0.2.0-1.fc43.x86_64.rpm
+sudo dnf install ./linuxpods-1.0.0-1.fc43.x86_64.rpm ./linuxpods-plasmoid-1.0.0-1.fc43.x86_64.rpm
 systemctl --user enable --now linuxpods-daemon
 ```
 
@@ -47,13 +47,13 @@ The plasmoid appears in the system tray automatically when AirPods connect.
 ### Build from source
 
 ```bash
-git clone https://github.com/Puerh0x1/LinuxPods.git
+git clone https://github.com/Explor3Universe/LinuxPods.git
 cd LinuxPods
 
 # RPM build
 ./build.sh                # installs build dependencies via dnf
 ./build.sh --skip-deps    # if deps already installed
-sudo dnf install out/linuxpods-0.2.0-*.rpm out/linuxpods-plasmoid-0.2.0-*.rpm
+sudo dnf install out/linuxpods-1.0.0-*.rpm out/linuxpods-plasmoid-1.0.0-*.rpm
 
 # Or local build without RPM
 cmake -S src -B build

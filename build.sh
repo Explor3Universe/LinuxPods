@@ -41,36 +41,21 @@ fi
 NAME=$(awk '/^Name:/    {print $2; exit}' "$SPEC")
 VERSION=$(awk '/^Version:/ {print $2; exit}' "$SPEC")
 TARBALL="${NAME}-${VERSION}.tar.gz"
+# Inner directory name — mirrors the GitHub release archive layout
+# (%{URL}/archive/refs/tags/v${VERSION}.tar.gz expands to LinuxPods-${VERSION}/)
+# so the spec's %autosetup and %build steps are identical whether the
+# source is produced locally or fetched from a tagged upstream release.
+TARBALL_DIR="LinuxPods-${VERSION}"
 
 echo ">>> Preparing rpmbuild tree at $TOPDIR"
 mkdir -p "$TOPDIR"/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
 mkdir -p "$OUTDIR"
 
-echo ">>> Building source tarball from $SRC_DIR"
-# Pack src/*, plasmoid/*, data/* into ${NAME}-${VERSION}/* using --transform.
+echo ">>> Building source tarball from $SCRIPT_DIR"
 tar czf "$TOPDIR/SOURCES/$TARBALL" \
-    --transform="s|^src|${NAME}-${VERSION}|" \
-    --transform="s|^plasmoid|${NAME}-${VERSION}/plasmoid|" \
-    --transform="s|^data|${NAME}-${VERSION}/data|" \
+    --transform="s|^|${TARBALL_DIR}/|" \
     -C "$SCRIPT_DIR" \
-    src plasmoid data
-
-# Include the LICENSE and README at the top level of the tarball so the
-# spec can pick them up via %license and %doc.
-TMP_EXTRA="$(mktemp -d)"
-trap 'rm -rf "$TMP_EXTRA"' EXIT
-mkdir -p "$TMP_EXTRA/${NAME}-${VERSION}"
-cp "$SCRIPT_DIR/LICENSE" "$TMP_EXTRA/${NAME}-${VERSION}/LICENSE"
-cp "$SCRIPT_DIR/README.md" "$TMP_EXTRA/${NAME}-${VERSION}/README.md"
-tar rzf "$TOPDIR/SOURCES/$TARBALL" -C "$TMP_EXTRA" "${NAME}-${VERSION}/LICENSE" "${NAME}-${VERSION}/README.md" 2>/dev/null || {
-    # rzf doesn't work on gzipped archives — re-pack from scratch.
-    UNPACK="$(mktemp -d)"
-    tar xzf "$TOPDIR/SOURCES/$TARBALL" -C "$UNPACK"
-    cp "$SCRIPT_DIR/LICENSE" "$UNPACK/${NAME}-${VERSION}/LICENSE"
-    cp "$SCRIPT_DIR/README.md" "$UNPACK/${NAME}-${VERSION}/README.md"
-    tar czf "$TOPDIR/SOURCES/$TARBALL" -C "$UNPACK" "${NAME}-${VERSION}"
-    rm -rf "$UNPACK"
-}
+    src plasmoid data LICENSE README.md
 
 echo ">>> Tarball:"
 ls -la "$TOPDIR/SOURCES/$TARBALL"
