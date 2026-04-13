@@ -52,11 +52,9 @@ rm -rf "$TOPDIR"
 mkdir -p "$TOPDIR"/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
 mkdir -p "$OUTDIR"
 
-echo ">>> Building source tarball from $SCRIPT_DIR"
-tar czf "$TOPDIR/SOURCES/$TARBALL" \
-    --transform="s|^|${TARBALL_DIR}/|" \
-    -C "$SCRIPT_DIR" \
-    src plasmoid data LICENSE README.md
+GITHUB_URL="https://github.com/Explor3Universe/LinuxPods/archive/refs/tags/v${VERSION}.tar.gz"
+echo ">>> Downloading source tarball from $GITHUB_URL"
+curl -fSL -o "$TOPDIR/SOURCES/$TARBALL" "$GITHUB_URL"
 
 echo ">>> Tarball:"
 ls -la "$TOPDIR/SOURCES/$TARBALL"
