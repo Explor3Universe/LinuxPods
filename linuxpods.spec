@@ -1,5 +1,5 @@
 Name:           linuxpods
-Version:        1.0.0
+Version:        1.0.1
 Release:        1%{?dist}
 Summary:        AirPods control daemon and KDE Plasma 6 widget
 
@@ -109,6 +109,17 @@ test -x %{buildroot}%{_bindir}/linuxpods
 %{_datadir}/plasma/plasmoids/io.github.Explor3Universe.LinuxPods/
 
 %changelog
+* Sun Apr 13 2026 Nick <noreply@github.com> - 1.0.1-1%{?dist}
+- Address Fedora reviewer feedback (rhbz#2456922, comment 11):
+  - Fix CLI socket bug: was connecting to wrong socket name, CLI never worked
+  - Move CLI socket from /tmp to XDG_RUNTIME_DIR to prevent ownership conflicts
+  - Rename CLI from librepods-ctl to linuxpods for consistent naming
+  - Add --help/-h flag to CLI
+  - Rebrand D-Bus namespace from me.kavishdevar.linuxpods to
+    io.github.Explor3Universe.LinuxPods
+  - Remove all legacy librepods/LibrePods references
+  - Fix build.sh accumulating stale RPMs from previous builds
+
 * Sat Apr 11 2026 Nick <noreply@github.com> - 1.0.0-1%{?dist}
 - Address second round of Fedora package review feedback (rhbz#2456922):
   - Fix upstream URL to github.com/Explor3Universe/LinuxPods (the

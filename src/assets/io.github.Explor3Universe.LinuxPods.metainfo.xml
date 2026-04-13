@@ -39,6 +39,11 @@
   <content_rating type="oars-1.1" />
 
   <releases>
+    <release version="1.0.1" date="2026-04-13">
+      <description>
+        <p>Fix CLI socket bug, rebrand D-Bus namespace, rename CLI to linuxpods.</p>
+      </description>
+    </release>
     <release version="1.0.0" date="2026-04-11">
       <description>
         <p>First tagged upstream release: headless daemon with D-Bus API and native KDE Plasma 6 system tray plasmoid.</p>
