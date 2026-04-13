@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 [D-BUS Service]
-Name=me.kavishdevar.linuxpods
+Name=io.github.Explor3Universe.LinuxPods
 Exec=/usr/bin/linuxpods-daemon
 SystemdService=linuxpods-daemon.service

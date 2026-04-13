@@ -5,7 +5,7 @@
 #include <QLoggingCategory>
 #include <QProcessEnvironment>
 
-Q_DECLARE_LOGGING_CATEGORY(librepods)
+Q_DECLARE_LOGGING_CATEGORY(linuxpods)
 
 LinuxPodsService::LinuxPodsService(bool debugMode, QObject *parent)
     : QObject(parent)
@@ -17,7 +17,7 @@ LinuxPodsService::LinuxPodsService(bool debugMode, QObject *parent)
     , m_systemSleepMonitor(new SystemSleepMonitor(this))
 {
     QLoggingCategory::setFilterRules(
-        QString("librepods.debug=%1").arg(debugMode ? "true" : "false"));
+        QString("linuxpods.debug=%1").arg(debugMode ? "true" : "false"));
     LOG_INFO("LinuxPodsService: initializing");
 
     // Media controller

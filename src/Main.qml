@@ -259,7 +259,7 @@ ApplicationWindow {
             initialItem: mainPage
 
             // Allow opening directly on a sub-page from the CLI:
-            //   librepods --settings    or    librepods --hearing
+            //   linuxpods --settings    or    linuxpods --hearing
             Component.onCompleted: {
                 const args = Qt.application.arguments;
                 if (args.indexOf("--settings") !== -1) {

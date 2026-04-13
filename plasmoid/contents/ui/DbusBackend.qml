@@ -75,9 +75,9 @@ Item {
     function _get(k, fb) { return (k in _d) ? _d[k] : fb; }
 
     readonly property string _base: "gdbus call --session"
-        + " -d me.kavishdevar.linuxpods"
-        + " -o /me/kavishdevar/linuxpods"
-        + " -m me.kavishdevar.linuxpods.Manager."
+        + " -d io.github.Explor3Universe.LinuxPods"
+        + " -o /io/github/Explor3Universe/LinuxPods"
+        + " -m io.github.Explor3Universe.LinuxPods.Manager."
 
     function _call(method, arg) {
         _seq++;
@@ -89,10 +89,10 @@ Item {
     function _poll() {
         _seq++;
         let cmd = "gdbus call --session"
-            + " -d me.kavishdevar.linuxpods"
-            + " -o /me/kavishdevar/linuxpods"
+            + " -d io.github.Explor3Universe.LinuxPods"
+            + " -o /io/github/Explor3Universe/LinuxPods"
             + " -m org.freedesktop.DBus.Properties.GetAll"
-            + " me.kavishdevar.linuxpods.Manager"
+            + " io.github.Explor3Universe.LinuxPods.Manager"
             + " #" + _seq;
         pollDs.connectSource(cmd);
     }

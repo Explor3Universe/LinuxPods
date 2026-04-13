@@ -48,6 +48,7 @@ TARBALL="${NAME}-${VERSION}.tar.gz"
 TARBALL_DIR="LinuxPods-${VERSION}"
 
 echo ">>> Preparing rpmbuild tree at $TOPDIR"
+rm -rf "$TOPDIR"
 mkdir -p "$TOPDIR"/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
 mkdir -p "$OUTDIR"
 

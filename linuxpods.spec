@@ -34,7 +34,7 @@ session D-Bus interface, using the reverse-engineered Apple Accessory
 Protocol (AAP) over Bluetooth L2CAP.
 
 This package ships the headless daemon (linuxpods-daemon), its systemd
-user unit, the D-Bus session activation file, and the librepods-ctl
+user unit, the D-Bus session activation file, and the linuxpods
 command-line client. Install the linuxpods-plasmoid sub-package for the
 native KDE Plasma 6 system tray widget.
 
@@ -44,7 +44,7 @@ Features:
   * Ear detection with auto pause/play
   * Conversational Awareness
   * D-Bus API for scripting and integration
-  * Command-line control tool (librepods-ctl)
+  * Command-line control tool (linuxpods)
 
 # ── Plasmoid subpackage ──────────────────────────────────────────────
 %package        plasmoid
@@ -73,13 +73,13 @@ pushd src
 %cmake_install
 popd
 install -Dpm 0644 data/man/linuxpods-daemon.1 %{buildroot}%{_mandir}/man1/linuxpods-daemon.1
-install -Dpm 0644 data/man/librepods-ctl.1    %{buildroot}%{_mandir}/man1/librepods-ctl.1
+install -Dpm 0644 data/man/linuxpods.1    %{buildroot}%{_mandir}/man1/linuxpods.1
 
 %check
 # No upstream unit tests yet. As a smoke test, verify the installed
 # binaries are present and executable.
 test -x %{buildroot}%{_bindir}/linuxpods-daemon
-test -x %{buildroot}%{_bindir}/librepods-ctl
+test -x %{buildroot}%{_bindir}/linuxpods
 
 %post
 %systemd_user_post linuxpods-daemon.service
@@ -95,10 +95,10 @@ test -x %{buildroot}%{_bindir}/librepods-ctl
 %license LICENSE
 %doc README.md
 %{_bindir}/linuxpods-daemon
-%{_bindir}/librepods-ctl
+%{_bindir}/linuxpods
 %{_mandir}/man1/linuxpods-daemon.1*
-%{_mandir}/man1/librepods-ctl.1*
-%{_datadir}/dbus-1/services/me.kavishdevar.linuxpods.service
+%{_mandir}/man1/linuxpods.1*
+%{_datadir}/dbus-1/services/io.github.Explor3Universe.LinuxPods.service
 %{_userunitdir}/linuxpods-daemon.service
 %{_userpresetdir}/90-linuxpods.preset
 
@@ -106,7 +106,7 @@ test -x %{buildroot}%{_bindir}/librepods-ctl
 %files plasmoid
 %license LICENSE
 %doc README.md
-%{_datadir}/plasma/plasmoids/me.kavishdevar.linuxpods/
+%{_datadir}/plasma/plasmoids/io.github.Explor3Universe.LinuxPods/
 
 %changelog
 * Sat Apr 11 2026 Nick <noreply@github.com> - 1.0.0-1%{?dist}
@@ -127,7 +127,7 @@ test -x %{buildroot}%{_bindir}/librepods-ctl
   - Add Requires: dbus-common for /usr/share/dbus-1 ownership
   - Use %%{?_isa} in plasmoid subpackage inter-package Requires
   - Strip RPATH from installed binaries (CMake + Qt fix)
-  - Ship man pages for linuxpods-daemon and librepods-ctl
+  - Ship man pages for linuxpods-daemon and linuxpods
   - Add %%check section validating built binaries
   - Mark plasmoid subpackage BuildArch: noarch (pure QML)
   - Add rpmlintrc to filter legitimate project-name false positives
@@ -141,7 +141,7 @@ test -x %{buildroot}%{_bindir}/librepods-ctl
 
 * Thu Apr 09 2026 Nick <noreply@github.com> - 0.2.0-1%{?dist}
 - Architecture split: headless daemon + Plasma 6 plasmoid
-- Add D-Bus interface (me.kavishdevar.linuxpods.Manager)
+- Add D-Bus interface (io.github.Explor3Universe.LinuxPods.Manager)
 - Add systemd user service and D-Bus activation
 - Add native Plasma 6 system tray widget (linuxpods-plasmoid)
 - Fix critical bugs: use-after-free, double-free, socket leaks

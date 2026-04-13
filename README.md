@@ -17,7 +17,7 @@ Built on the reverse-engineered Apple Accessory Protocol (AAP) over L2CAP.
 - Connection notifications
 - Native KDE Plasma 6 system tray widget
 - D-Bus API for scripting and integration
-- CLI tool (`librepods-ctl`)
+- CLI tool (`linuxpods`)
 
 Tested on **AirPods Pro 2 USB-C (2024)**, Fedora 43 + KDE Plasma 6 + Wayland.
 
@@ -26,7 +26,7 @@ Tested on **AirPods Pro 2 USB-C (2024)**, Fedora 43 + KDE Plasma 6 + Wayland.
 ```
 linuxpods-daemon          Headless C++ backend (BLE, AAP protocol, media)
        │
-       │ D-Bus: me.kavishdevar.linuxpods
+       │ D-Bus: io.github.Explor3Universe.LinuxPods
        │
   Plasma plasmoid         Native system tray widget (QML)
 ```
@@ -81,25 +81,25 @@ journalctl --user -u linuxpods-daemon -f         # live logs
 ### CLI
 
 ```bash
-librepods-ctl noise:anc           # Active Noise Cancellation
-librepods-ctl noise:transparency  # Transparency mode
-librepods-ctl noise:adaptive      # Adaptive mode
-librepods-ctl noise:off           # Off
+linuxpods noise:anc           # Active Noise Cancellation
+linuxpods noise:transparency  # Transparency mode
+linuxpods noise:adaptive      # Adaptive mode
+linuxpods noise:off           # Off
 ```
 
 ### D-Bus
 
 ```bash
 # Read all properties
-gdbus call --session -d me.kavishdevar.linuxpods \
-  -o /me/kavishdevar/linuxpods \
+gdbus call --session -d io.github.Explor3Universe.LinuxPods \
+  -o /io/github/Explor3Universe/LinuxPods \
   -m org.freedesktop.DBus.Properties.GetAll \
-  me.kavishdevar.linuxpods.Manager
+  io.github.Explor3Universe.LinuxPods.Manager
 
 # Set noise control mode (0=Off, 1=ANC, 2=Transparency, 3=Adaptive)
-gdbus call --session -d me.kavishdevar.linuxpods \
-  -o /me/kavishdevar/linuxpods \
-  -m me.kavishdevar.linuxpods.Manager.SetNoiseControlMode 3
+gdbus call --session -d io.github.Explor3Universe.LinuxPods \
+  -o /io/github/Explor3Universe/LinuxPods \
+  -m io.github.Explor3Universe.LinuxPods.Manager.SetNoiseControlMode 3
 ```
 
 ## Project Structure
@@ -122,7 +122,7 @@ plasmoid/
 
 data/
   linuxpods-daemon.service      Systemd user service
-  me.kavishdevar.linuxpods.service  D-Bus activation
+  io.github.Explor3Universe.LinuxPods.service  D-Bus activation
 ```
 
 ## Packages
@@ -134,8 +134,3 @@ The RPM spec produces two packages:
 | `linuxpods` | Daemon, CLI, D-Bus service, systemd unit |
 | `linuxpods-plasmoid` | KDE Plasma 6 system tray widget |
 
-## License
-
-**GPL-3.0-or-later**
-
-Based on [LibrePods](https://github.com/kavishdevar/librepods) by kavishdevar.

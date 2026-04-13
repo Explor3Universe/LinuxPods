@@ -7,20 +7,21 @@
 #include <QStandardPaths>
 #include <QFile>
 #include <QLoggingCategory>
+#include <unistd.h>
 
 #include "logger.h"
 #include "service/linuxpodsservice.h"
 #include "dbus/linuxpodsdbusadaptor.h"
 
-Q_LOGGING_CATEGORY(librepods, "librepods")
+Q_LOGGING_CATEGORY(linuxpods, "linuxpods")
 
 // Headless daemon entry point for LinuxPods.
 //
 // Runs without any GUI (QCoreApplication).
 // Provides:
 //   - AirPods protocol, BLE scanning, media integration
-//   - D-Bus service at me.kavishdevar.linuxpods
-//   - QLocalServer for CLI commands (librepods-ctl)
+//   - D-Bus service at io.github.Explor3Universe.LinuxPods
+//   - QLocalServer for CLI commands (linuxpods-ctl)
 //
 // On Plasma, the plasmoid talks to this daemon over D-Bus.
 
@@ -36,13 +37,13 @@ int main(int argc, char *argv[])
     QStringList translationPaths = {
         QCoreApplication::applicationDirPath() + "/translations",
         QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation)
-            + "/librepods/translations",
-        "/usr/share/librepods/translations",
-        "/usr/local/share/librepods/translations"
+            + "/linuxpods/translations",
+        "/usr/share/linuxpods/translations",
+        "/usr/local/share/linuxpods/translations"
     };
     for (const QString &path : translationPaths)
     {
-        if (translator->load("librepods_" + locale, path))
+        if (translator->load("linuxpods_" + locale, path))
         {
             app.installTranslator(translator);
             break;
@@ -56,13 +57,17 @@ int main(int argc, char *argv[])
         if (QString(argv[i]) == "--debug") debugMode = true;
     }
 
-    // ── Single-instance check ───────────────────────────────────────
-    QLocalServer::removeServer("linuxpods-daemon");
-    QFile stale("/tmp/app_server");
-    if (stale.exists()) stale.remove();
+    // ── Socket path in XDG_RUNTIME_DIR (user-private, no root conflicts) ──
+    QString runtimeDir = QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation);
+    if (runtimeDir.isEmpty())
+        runtimeDir = QString("/run/user/%1").arg(getuid());
+    QString socketPath = runtimeDir + "/linuxpods-daemon";
 
+    // ── Single-instance check ───────────────────────────────────────
+    // Remove stale socket file (from a crashed previous run)
+    QFile::remove(socketPath);
     QLocalSocket socketCheck;
-    socketCheck.connectToServer("linuxpods-daemon");
+    socketCheck.connectToServer(socketPath);
     if (socketCheck.waitForConnected(300))
     {
         LOG_INFO("Another instance already running, exiting.");
@@ -79,16 +84,16 @@ int main(int argc, char *argv[])
     // ── Initialize (connect to already-paired devices) ──────────────
     service.initialize();
 
-    // ── Local server for CLI commands (librepods-ctl) ────────────────
+    // ── Local server for CLI commands ────────────────────────────────
     QLocalServer server;
-    QLocalServer::removeServer("linuxpods-daemon");
-    if (!server.listen("linuxpods-daemon"))
+    server.setSocketOptions(QLocalServer::UserAccessOption);
+    if (!server.listen(socketPath))
     {
         LOG_ERROR("Unable to start CLI listening server: " << server.errorString());
     }
     else
     {
-        LOG_INFO("CLI server started on app_server");
+        LOG_INFO("CLI server listening on " << socketPath);
     }
 
     QObject::connect(&server, &QLocalServer::newConnection, [&]() {
@@ -112,11 +117,9 @@ int main(int argc, char *argv[])
 
     QObject::connect(&app, &QCoreApplication::aboutToQuit, [&]() {
         if (server.isListening()) server.close();
-        QLocalServer::removeServer("linuxpods-daemon");
-        QFile staleFile("/tmp/app_server");
-        if (staleFile.exists()) staleFile.remove();
+        QFile::remove(socketPath);
     });
 
-    LOG_INFO("linuxpods-daemon running. D-Bus: me.kavishdevar.linuxpods");
+    LOG_INFO("linuxpods-daemon running. D-Bus: io.github.Explor3Universe.LinuxPods");
     return app.exec();
 }

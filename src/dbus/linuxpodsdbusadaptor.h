@@ -9,16 +9,16 @@
 
 // D-Bus adaptor that exposes LinuxPodsService on the session bus.
 //
-//   Service:   me.kavishdevar.linuxpods
-//   Path:      /me/kavishdevar/linuxpods
-//   Interface: me.kavishdevar.linuxpods.Manager
+//   Service:   io.github.Explor3Universe.LinuxPods
+//   Path:      /io/github/Explor3Universe/LinuxPods
+//   Interface: io.github.Explor3Universe.LinuxPods.Manager
 //
 // All properties are read-only on D-Bus; mutations go through methods.
 // PropertiesChanged is emitted automatically by Qt when properties change.
 class LinuxPodsDBusAdaptor : public QDBusAbstractAdaptor
 {
     Q_OBJECT
-    Q_CLASSINFO("D-Bus Interface", "me.kavishdevar.linuxpods.Manager")
+    Q_CLASSINFO("D-Bus Interface", "io.github.Explor3Universe.LinuxPods.Manager")
 
     // ── Connection ──────────────────────────────────────────────────
     Q_PROPERTY(bool Connected READ connected)
@@ -104,20 +104,20 @@ public:
         Q_UNUSED(adaptor)
 
         QDBusConnection bus = QDBusConnection::sessionBus();
-        if (!bus.registerObject(QStringLiteral("/me/kavishdevar/linuxpods"), service))
+        if (!bus.registerObject(QStringLiteral("/io/github/Explor3Universe/LinuxPods"), service))
         {
             LOG_ERROR("D-Bus: failed to register object: " << bus.lastError().message());
             return false;
         }
-        if (!bus.registerService(QStringLiteral("me.kavishdevar.linuxpods")))
+        if (!bus.registerService(QStringLiteral("io.github.Explor3Universe.LinuxPods")))
         {
             LOG_WARN("D-Bus: name already taken, queuing for ownership");
             // Queue — we'll get the name when the old owner exits.
             bus.interface()->call(QStringLiteral("RequestName"),
-                                  QStringLiteral("me.kavishdevar.linuxpods"),
+                                  QStringLiteral("io.github.Explor3Universe.LinuxPods"),
                                   (uint)0 /* no flags = queue for ownership */);
         }
-        LOG_INFO("D-Bus: registered me.kavishdevar.linuxpods on session bus");
+        LOG_INFO("D-Bus: registered io.github.Explor3Universe.LinuxPods on session bus");
         return true;
     }
 
@@ -187,11 +187,11 @@ private:
         // an empty changed-properties map and all invalidated.
         // Listeners will re-read properties they care about.
         QDBusMessage signal = QDBusMessage::createSignal(
-            QStringLiteral("/me/kavishdevar/linuxpods"),
+            QStringLiteral("/io/github/Explor3Universe/LinuxPods"),
             QStringLiteral("org.freedesktop.DBus.Properties"),
             QStringLiteral("PropertiesChanged"));
 
-        signal << QStringLiteral("me.kavishdevar.linuxpods.Manager");
+        signal << QStringLiteral("io.github.Explor3Universe.LinuxPods.Manager");
         signal << QVariantMap{};  // changed_properties (empty — force re-read)
 
         // Invalidated properties: all of them

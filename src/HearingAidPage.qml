@@ -11,7 +11,7 @@ import QtQuick.Layouts 1.15
 // Aid Setup") and re-implemented in QML.
 //
 // NOTE: this is a UI placeholder — the underlying hearing aid AAP
-// commands are NOT wired into librepods Linux yet. Slider values are
+// commands are NOT wired into linuxpods Linux yet. Slider values are
 // stored locally only. SAVE / RESET update local state. The page
 // exists to demonstrate the design system across multiple screens.
 Item {

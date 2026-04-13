@@ -11,7 +11,7 @@
         "Description": "AirPods battery, noise control, and feature management for Linux",
         "EnabledByDefault": true,
         "Icon": "audio-headphones",
-        "Id": "me.kavishdevar.linuxpods",
+        "Id": "io.github.Explor3Universe.LinuxPods",
         "License": "GPL-3.0-or-later",
         "Name": "LinuxPods",
         "Version": "1.0.0"

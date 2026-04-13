@@ -15,12 +15,12 @@ integration (PulseAudio and MPRIS), and the BLE proximity advertising
 used by AirPods for pairing.
 .PP
 The daemon exposes a session D-Bus interface at
-.I me.kavishdevar.linuxpods
+.I io.github.Explor3Universe.LinuxPods
 on the
-.I /me/kavishdevar/linuxpods
+.I /io/github/Explor3Universe/LinuxPods
 object path, used by front-ends such as the LinuxPods Plasma 6 tray
 widget and the
-.BR librepods-ctl (1)
+.BR linuxpods (1)
 command-line tool.
 .PP
 It is intended to be started automatically by the user systemd instance
@@ -43,11 +43,10 @@ Per-user settings store (device address, behaviour toggles).
 .I /usr/lib/systemd/user/linuxpods-daemon.service
 Systemd user unit used to start the daemon on login.
 .TP
-.I /usr/share/dbus-1/services/me.kavishdevar.linuxpods.service
+.I /usr/share/dbus-1/services/io.github.Explor3Universe.LinuxPods.service
 D-Bus session activation file.
 .SH SEE ALSO
-.BR librepods (1),
-.BR librepods-ctl (1),
+.BR linuxpods (1),
 .BR bluetoothctl (1),
 .BR systemctl (1)
 .SH BUGS

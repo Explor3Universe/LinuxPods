@@ -24,7 +24,7 @@
 
 using namespace AirpodsTrayApp::Enums;
 
-Q_LOGGING_CATEGORY(librepods, "librepods")
+Q_LOGGING_CATEGORY(linuxpods, "linuxpods")
 
 // AirPodsTrayApp: thin GUI shell that wires LinuxPodsService (headless
 // backend) to a QML UI and a KStatusNotifierItem tray icon.
@@ -264,13 +264,13 @@ int main(int argc, char *argv[])
     QStringList translationPaths = {
         QCoreApplication::applicationDirPath() + "/translations",
         QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation)
-            + "/librepods/translations",
-        "/usr/share/librepods/translations",
-        "/usr/local/share/librepods/translations"
+            + "/linuxpods/translations",
+        "/usr/share/linuxpods/translations",
+        "/usr/local/share/linuxpods/translations"
     };
     for (const QString &path : translationPaths)
     {
-        if (translator->load("librepods_" + locale, path))
+        if (translator->load("linuxpods_" + locale, path))
         {
             app.installTranslator(translator);
             break;
@@ -294,7 +294,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    app.setDesktopFileName("me.kavishdevar.librepods");
+    app.setDesktopFileName("io.github.Explor3Universe.LinuxPods");
     app.setQuitOnLastWindowClosed(false);
 
     // ── Parse arguments ─────────────────────────────────────────────
@@ -314,8 +314,8 @@ int main(int argc, char *argv[])
 
     // ── Create QML engine and GUI shell ─────────────────────────────
     QQmlApplicationEngine engine;
-    qmlRegisterType<Battery>("me.kavishdevar.Battery", 1, 0, "Battery");
-    qmlRegisterType<DeviceInfo>("me.kavishdevar.DeviceInfo", 1, 0, "DeviceInfo");
+    qmlRegisterType<Battery>("io.github.Explor3Universe.Battery", 1, 0, "Battery");
+    qmlRegisterType<DeviceInfo>("io.github.Explor3Universe.DeviceInfo", 1, 0, "DeviceInfo");
 
     AirPodsTrayApp trayApp(&service, hideOnStart, &engine);
     engine.rootContext()->setContextProperty("airPodsTrayApp", &trayApp);

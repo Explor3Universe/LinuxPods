@@ -3,9 +3,9 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=LibrePods
-Comment=AirPods liberated from Apple's ecosystem
-Exec=librepods
-Icon=librepods
+Name=LinuxPods
+Comment=Native AirPods integration for Linux
+Exec=linuxpods-gui
+Icon=linuxpods
 Terminal=false
 Categories=AudioVideo;Utility;Qt;

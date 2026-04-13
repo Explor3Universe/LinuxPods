@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <component type="desktop-application">
-  <id>me.kavishdevar.linuxpods</id>
+  <id>io.github.Explor3Universe.LinuxPods</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
 
@@ -28,12 +28,12 @@
   <url type="homepage">https://github.com/Explor3Universe/LinuxPods</url>
   <url type="bugtracker">https://github.com/Explor3Universe/LinuxPods/issues</url>
 
-  <launchable type="desktop-id">me.kavishdevar.librepods.desktop</launchable>
+  <launchable type="desktop-id">io.github.Explor3Universe.LinuxPods.desktop</launchable>
 
   <provides>
-    <dbus type="session">me.kavishdevar.linuxpods</dbus>
+    <dbus type="session">io.github.Explor3Universe.LinuxPods</dbus>
     <binary>linuxpods-daemon</binary>
-    <binary>librepods-ctl</binary>
+    <binary>linuxpods</binary>
   </provides>
 
   <content_rating type="oars-1.1" />

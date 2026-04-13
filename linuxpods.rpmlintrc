@@ -3,9 +3,9 @@
 
 # Project / binary / technology names that rpmlint's English dictionary does
 # not know but which are not misspellings:
-#   linuxpods, librepods    — upstream project name
+#   linuxpods               — upstream project name
 #   ctl                     — conventional control-tool suffix
 #   plasmoid                — KDE term for a Plasma widget
 #   systemd                 — service manager
 #   backend                 — software architecture term
-addFilter(r"spelling-error.*(linuxpods|librepods|ctl|plasmoid|systemd|backend)")
+addFilter(r"spelling-error.*(linuxpods|ctl|plasmoid|systemd|backend)")

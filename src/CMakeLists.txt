@@ -32,11 +32,11 @@ qt_standard_project_setup()
 
 include(GNUInstallDirs)
 
-# ── Standalone Qt6/QML GUI (librepods) ───────────────────────────────
+# ── Standalone Qt6/QML GUI (linuxpods-gui) ───────────────────────────────
 if(LINUXPODS_BUILD_GUI)
-    set(TS_FILES translations/librepods_tr.ts)
+    set(TS_FILES translations/linuxpods-gui_tr.ts)
 
-    qt_add_executable(librepods
+    qt_add_executable(linuxpods-gui
         main.cpp
         logger.h
         service/linuxpodsservice.cpp
@@ -69,7 +69,7 @@ if(LINUXPODS_BUILD_GUI)
         systemsleepmonitor.hpp
     )
 
-    qt_add_qml_module(librepods
+    qt_add_qml_module(linuxpods-gui
         URI linux
         VERSION 1.0
         QML_FILES
@@ -84,7 +84,7 @@ if(LINUXPODS_BUILD_GUI)
             SettingRow.qml
     )
 
-    qt_add_resources(librepods "resources"
+    qt_add_resources(linuxpods-gui "resources"
         PREFIX "/icons"
         FILES
             assets/airpods.png
@@ -98,55 +98,55 @@ if(LINUXPODS_BUILD_GUI)
             assets/podmax.png
     )
 
-    target_link_libraries(librepods
+    target_link_libraries(linuxpods-gui
         PRIVATE Qt6::Quick Qt6::Widgets Qt6::Bluetooth Qt6::DBus
                 KF6::StatusNotifierItem
                 OpenSSL::SSL OpenSSL::Crypto ${PULSEAUDIO_LIBRARIES}
     )
-    target_include_directories(librepods PRIVATE ${PULSEAUDIO_INCLUDE_DIRS})
+    target_include_directories(linuxpods-gui PRIVATE ${PULSEAUDIO_INCLUDE_DIRS})
 
-    set_target_properties(librepods PROPERTIES
+    set_target_properties(linuxpods-gui PROPERTIES
         INSTALL_RPATH ""
         BUILD_WITH_INSTALL_RPATH OFF
         SKIP_BUILD_RPATH ON
     )
 
-    install(TARGETS librepods
+    install(TARGETS linuxpods-gui
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     )
-    install(FILES assets/me.kavishdevar.librepods.desktop
+    install(FILES assets/io.github.Explor3Universe.LinuxPods.desktop
         DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/applications")
-    install(FILES assets/librepods.svg
+    install(FILES assets/linuxpods-gui.svg
         DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/scalable/apps")
-    install(FILES assets/me.kavishdevar.linuxpods.metainfo.xml
+    install(FILES assets/io.github.Explor3Universe.LinuxPods.metainfo.xml
         DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/metainfo")
 
-    qt_add_translations(librepods
+    qt_add_translations(linuxpods-gui
         TS_FILES ${TS_FILES}
         QM_FILES_OUTPUT_VARIABLE QM_FILES
     )
     install(FILES ${QM_FILES}
-        DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/librepods/translations")
+        DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/linuxpods-gui/translations")
 endif()
 
-# ── Command-line control tool (librepods-ctl) ────────────────────────
-qt_add_executable(librepods-ctl
-    librepods-ctl.cpp
+# ── Command-line control tool (linuxpods) ────────────────────────
+qt_add_executable(linuxpods
+    linuxpods.cpp
 )
-target_link_libraries(librepods-ctl
+target_link_libraries(linuxpods
     PRIVATE Qt6::Core Qt6::Network
 )
-set_target_properties(librepods-ctl PROPERTIES
+set_target_properties(linuxpods PROPERTIES
     INSTALL_RPATH ""
     BUILD_WITH_INSTALL_RPATH OFF
     SKIP_BUILD_RPATH ON
 )
-install(TARGETS librepods-ctl
+install(TARGETS linuxpods
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
 # ── Headless daemon (linuxpods-daemon) ───────────────────────────────
-# Shares all backend sources with librepods but has no QML/GUI.
+# Shares all backend sources with linuxpods-gui but has no QML/GUI.
 set(DAEMON_SOURCES
     daemon/main.cpp
     service/linuxpodsservice.cpp
@@ -193,9 +193,9 @@ install(TARGETS linuxpods-daemon
 # ── Locate side data and plasmoid trees ──────────────────────────────
 # When building locally with `cmake -S src -B build`, they are at ../data.
 # When building from RPM tarball, they are siblings: data/ and plasmoid/.
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../data/me.kavishdevar.linuxpods.service")
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../data/io.github.Explor3Universe.LinuxPods.service")
     set(DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../data")
-elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/data/me.kavishdevar.linuxpods.service")
+elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/data/io.github.Explor3Universe.LinuxPods.service")
     set(DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/data")
 endif()
 
@@ -207,7 +207,7 @@ endif()
 
 # D-Bus session activation, systemd user unit, preset
 if(DATA_DIR)
-    install(FILES "${DATA_DIR}/me.kavishdevar.linuxpods.service"
+    install(FILES "${DATA_DIR}/io.github.Explor3Universe.LinuxPods.service"
         DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/dbus-1/services")
     install(FILES "${DATA_DIR}/linuxpods-daemon.service"
         DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/systemd/user")
@@ -218,7 +218,7 @@ endif()
 # ── Plasma 6 plasmoid ────────────────────────────────────────────────
 if(PLASMOID_DIR)
     install(DIRECTORY "${PLASMOID_DIR}/"
-        DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/plasma/plasmoids/me.kavishdevar.linuxpods"
+        DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/plasma/plasmoids/io.github.Explor3Universe.LinuxPods"
         FILES_MATCHING
         PATTERN "*.json"
         PATTERN "*.qml"

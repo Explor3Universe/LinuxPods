@@ -2,7 +2,7 @@
 <!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
  "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
 <node>
-  <interface name="me.kavishdevar.linuxpods.Manager">
+  <interface name="io.github.Explor3Universe.LinuxPods.Manager">
 
     <!-- Connection state -->
     <property name="Connected" type="b" access="read"/>
