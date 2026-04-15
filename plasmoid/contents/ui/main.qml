@@ -33,7 +33,7 @@ PlasmoidItem {
         ? _backend.minBattery + "%"
         : ""
 
-    compactRepresentation: CompactRepresentation {}
+    compactRepresentation: CompactRepresentation { plasmoidItem: root }
     fullRepresentation: FullRepresentation {}
     // NO preferredRepresentation — system tray requires it unset
     // to handle click-to-expand

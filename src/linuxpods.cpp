@@ -16,7 +16,9 @@ int main(int argc, char *argv[]) {
             << "  noise:off           Disable noise control\n"
             << "  noise:anc           Enable Active Noise Cancellation\n"
             << "  noise:transparency  Enable Transparency mode\n"
-            << "  noise:adaptive      Enable Adaptive mode\n";
+            << "  noise:adaptive      Enable Adaptive mode\n"
+            << "  ca:on               Enable Conversational Awareness\n"
+            << "  ca:off              Disable Conversational Awareness\n";
         return argc < 2 ? 1 : 0;
     }
 

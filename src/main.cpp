@@ -355,6 +355,10 @@ int main(int argc, char *argv[])
                 service.setNoiseControlModeInt(2);
             else if (msg == "noise:adaptive")
                 service.setNoiseControlModeInt(3);
+            else if (msg == "ca:on")
+                service.setConversationalAwareness(true);
+            else if (msg == "ca:off")
+                service.setConversationalAwareness(false);
             else
                 LOG_ERROR("Unknown message: " << msg);
             sock->disconnectFromServer();

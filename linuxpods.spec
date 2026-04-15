@@ -1,5 +1,5 @@
 Name:           linuxpods
-Version:        1.0.1
+Version:        1.0.2
 Release:        1%{?dist}
 Summary:        AirPods control daemon and KDE Plasma 6 widget
 
@@ -109,6 +109,19 @@ test -x %{buildroot}%{_bindir}/linuxpods
 %{_datadir}/plasma/plasmoids/io.github.Explor3Universe.LinuxPods/
 
 %changelog
+* Wed Apr 15 2026 Nick <noreply@github.com> - 1.0.2-1%{?dist}
+- Address Fedora reviewer feedback (rhbz#2456922, comment 17):
+  - Fix click-to-expand on the Plasma tray icon. Previously the popup
+    opened only when the plasmoid was hosted inside the System Tray
+    widget, which catches clicks itself; when the plasmoid was placed
+    directly on a panel the CompactRepresentation had no MouseArea
+    and clicks were dropped. Switch to the canonical KDE pattern
+    (required property PlasmoidItem plasmoidItem + explicit MouseArea
+    toggling plasmoidItem.expanded) so the popup opens in every
+    placement.
+  - Add Conversational Awareness controls to the CLI: new commands
+    'linuxpods ca:on' and 'linuxpods ca:off', exposed in --help.
+
 * Sun Apr 13 2026 Nick <noreply@github.com> - 1.0.1-1%{?dist}
 - Address Fedora reviewer feedback (rhbz#2456922, comment 11):
   - Fix CLI socket bug: was connecting to wrong socket name, CLI never worked
