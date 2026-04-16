@@ -1,24 +1,22 @@
 Name:           linuxpods
 Version:        1.0.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        AirPods control daemon and KDE Plasma 6 widget
 
 License:        GPL-3.0-or-later
 URL:            https://github.com/Explor3Universe/LinuxPods
-Source0:        %{URL}/archive/refs/tags/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
+Source0:        %{url}/archive/v%{version}/%{name}-%{version}.tar.gz
 Source1:        %{name}.rpmlintrc
 
 BuildRequires:  cmake >= 3.16
 BuildRequires:  gcc-c++
-BuildRequires:  qt6-qtbase-devel
-BuildRequires:  qt6-qtconnectivity-devel
-BuildRequires:  openssl-devel
-BuildRequires:  pulseaudio-libs-devel
-BuildRequires:  pkgconfig
+BuildRequires:  cmake(Qt6Core)
+BuildRequires:  cmake(Qt6Bluetooth)
+BuildRequires:  cmake(Qt6DBus)
+BuildRequires:  pkgconfig(openssl)
+BuildRequires:  pkgconfig(libpulse)
 BuildRequires:  systemd-rpm-macros
 
-# Runtime deps auto-detected from ELF linkage, except the following which
-# do not appear as .so dependencies but are still required at runtime.
 Requires:       bluez
 Requires:       dbus-common
 
@@ -46,7 +44,6 @@ Features:
   * D-Bus API for scripting and integration
   * Command-line control tool (linuxpods)
 
-# ── Plasmoid subpackage ──────────────────────────────────────────────
 %package        plasmoid
 Summary:        KDE Plasma 6 system tray widget for LinuxPods
 BuildArch:      noarch
@@ -62,9 +59,13 @@ linuxpods-daemon over D-Bus.
 %prep
 %autosetup -n LinuxPods-%{version}
 
-%build
+%conf
 pushd src
 %cmake -DLINUXPODS_BUILD_GUI=OFF
+popd
+
+%build
+pushd src
 %cmake_build
 popd
 
@@ -73,11 +74,9 @@ pushd src
 %cmake_install
 popd
 install -Dpm 0644 data/man/linuxpods-daemon.1 %{buildroot}%{_mandir}/man1/linuxpods-daemon.1
-install -Dpm 0644 data/man/linuxpods.1    %{buildroot}%{_mandir}/man1/linuxpods.1
+install -Dpm 0644 data/man/linuxpods.1        %{buildroot}%{_mandir}/man1/linuxpods.1
 
 %check
-# No upstream unit tests yet. As a smoke test, verify the installed
-# binaries are present and executable.
 test -x %{buildroot}%{_bindir}/linuxpods-daemon
 test -x %{buildroot}%{_bindir}/linuxpods
 
@@ -90,7 +89,6 @@ test -x %{buildroot}%{_bindir}/linuxpods
 %postun
 %systemd_user_postun_with_restart linuxpods-daemon.service
 
-# ── Main package files ───────────────────────────────────────────────
 %files
 %license LICENSE
 %doc README.md
@@ -100,73 +98,36 @@ test -x %{buildroot}%{_bindir}/linuxpods
 %{_mandir}/man1/linuxpods.1*
 %{_datadir}/dbus-1/services/io.github.Explor3Universe.LinuxPods.service
 %{_userunitdir}/linuxpods-daemon.service
-%{_userpresetdir}/90-linuxpods.preset
 
-# ── Plasmoid subpackage files ────────────────────────────────────────
 %files plasmoid
 %license LICENSE
 %doc README.md
 %{_datadir}/plasma/plasmoids/io.github.Explor3Universe.LinuxPods/
 
 %changelog
-* Wed Apr 15 2026 Nick <noreply@github.com> - 1.0.2-1%{?dist}
-- Address Fedora reviewer feedback (rhbz#2456922, comment 17):
-  - Fix click-to-expand on the Plasma tray icon. Previously the popup
-    opened only when the plasmoid was hosted inside the System Tray
-    widget, which catches clicks itself; when the plasmoid was placed
-    directly on a panel the CompactRepresentation had no MouseArea
-    and clicks were dropped. Switch to the canonical KDE pattern
-    (required property PlasmoidItem plasmoidItem + explicit MouseArea
-    toggling plasmoidItem.expanded) so the popup opens in every
-    placement.
-  - Add Conversational Awareness controls to the CLI: new commands
-    'linuxpods ca:on' and 'linuxpods ca:off', exposed in --help.
+* Thu Apr 16 2026 Nikita Sizikov <nixs.code@gmail.com> - 1.0.2-2
+- Address Fedora reviewer feedback (rhbz#2456922, comment 20):
+  - Source0 URL switched to canonical git-tag format per SourceURL
+    guideline (archive/v%%{version}/ instead of archive/refs/tags/)
+  - BuildRequires converted to cmake() and pkgconfig() virtual provides
+  - %%build split into %%conf + %%build per Fedora CMake macro convention
+  - Changelog author updated with contactable email, dropped %%{?dist}
+  - Removed 90-linuxpods.preset — user presets are not allowed in
+    individual packages per Fedora DefaultServices policy
+  - Cleaned up section comments
 
-* Sun Apr 13 2026 Nick <noreply@github.com> - 1.0.1-1%{?dist}
-- Address Fedora reviewer feedback (rhbz#2456922, comment 11):
-  - Fix CLI socket bug: was connecting to wrong socket name, CLI never worked
-  - Move CLI socket from /tmp to XDG_RUNTIME_DIR to prevent ownership conflicts
-  - Rename CLI from librepods-ctl to linuxpods for consistent naming
-  - Add --help/-h flag to CLI
-  - Rebrand D-Bus namespace from me.kavishdevar.linuxpods to
-    io.github.Explor3Universe.LinuxPods
-  - Remove all legacy librepods/LibrePods references
-  - Fix build.sh accumulating stale RPMs from previous builds
+* Wed Apr 15 2026 Nikita Sizikov <nixs.code@gmail.com> - 1.0.2-1
+- Fix click-to-expand on the Plasma tray icon (rhbz#2456922, comment 17)
+- Add Conversational Awareness controls to the CLI (ca:on / ca:off)
 
-* Sat Apr 11 2026 Nick <noreply@github.com> - 1.0.0-1%{?dist}
-- Address second round of Fedora package review feedback (rhbz#2456922):
-  - Fix upstream URL to github.com/Explor3Universe/LinuxPods (the
-    previous github.com/Puerh0x1/LinuxPods reference returned 404)
-  - First tagged upstream release v1.0.0, replacing the untagged
-    0.2.0 placeholder per Fedora Versioning Guidelines
-  - Source0 now fetches the v1.0.0 GitHub archive directly, dropping
-    the manual tarball generation workflow
-  - %%autosetup uses LinuxPods-%%{version}/ to match the GitHub
-    archive's directory name (repository is LinuxPods, not linuxpods)
-  - %%build and %%install push into src/ where CMakeLists.txt lives
+* Mon Apr 13 2026 Nikita Sizikov <nixs.code@gmail.com> - 1.0.1-1
+- Fix CLI socket bug, rebrand to LinuxPods (rhbz#2456922, comment 11)
 
-* Fri Apr 10 2026 Nick <noreply@github.com> - 0.2.0-2%{?dist}
-- Address Fedora package review feedback (rhbz#2456922):
-  - Source0 now uses %%{URL} prefix as required by SourceURL guideline
-  - Add Requires: dbus-common for /usr/share/dbus-1 ownership
-  - Use %%{?_isa} in plasmoid subpackage inter-package Requires
-  - Strip RPATH from installed binaries (CMake + Qt fix)
-  - Ship man pages for linuxpods-daemon and linuxpods
-  - Add %%check section validating built binaries
-  - Mark plasmoid subpackage BuildArch: noarch (pure QML)
-  - Add rpmlintrc to filter legitimate project-name false positives
-  - Declare bundled(qr-code-generator) Provides
-  - Add SPDX-License-Identifier headers to all first-party sources
-  - Drop the standalone Qt GUI front-end and the proprietary
-    Apple SF Symbols font it depended on; the package now ships only the
-    daemon, the CLI client and (via the subpackage) the Plasma 6 widget
-  - Drop unused desktop file, application icon and metainfo together
-    with the GUI to keep the package legally clean
+* Sat Apr 11 2026 Nikita Sizikov <nixs.code@gmail.com> - 1.0.0-1
+- First tagged upstream release, fix upstream URL (rhbz#2456922)
 
-* Thu Apr 09 2026 Nick <noreply@github.com> - 0.2.0-1%{?dist}
-- Architecture split: headless daemon + Plasma 6 plasmoid
-- Add D-Bus interface (io.github.Explor3Universe.LinuxPods.Manager)
-- Add systemd user service and D-Bus activation
-- Add native Plasma 6 system tray widget (linuxpods-plasmoid)
-- Fix critical bugs: use-after-free, double-free, socket leaks
-- Add AppStream metainfo for Fedora guidelines compliance
+* Fri Apr 10 2026 Nikita Sizikov <nixs.code@gmail.com> - 0.2.0-2
+- Address initial Fedora review feedback (rhbz#2456922)
+
+* Thu Apr 09 2026 Nikita Sizikov <nixs.code@gmail.com> - 0.2.0-1
+- Initial package

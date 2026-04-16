@@ -205,14 +205,14 @@ elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/plasmoid/metadata.json")
     set(PLASMOID_DIR "${CMAKE_CURRENT_SOURCE_DIR}/plasmoid")
 endif()
 
-# D-Bus session activation, systemd user unit, preset
+# D-Bus session activation + systemd user unit
 if(DATA_DIR)
     install(FILES "${DATA_DIR}/io.github.Explor3Universe.LinuxPods.service"
         DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/dbus-1/services")
     install(FILES "${DATA_DIR}/linuxpods-daemon.service"
         DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/systemd/user")
-    install(FILES "${DATA_DIR}/90-linuxpods.preset"
-        DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/systemd/user-preset")
+    # NOTE: user presets are NOT installed — Fedora policy reserves preset
+    # files for the redhat-systemd-presets package exclusively.
 endif()
 
 # ── Plasma 6 plasmoid ────────────────────────────────────────────────
