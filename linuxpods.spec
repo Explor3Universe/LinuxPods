@@ -1,9 +1,9 @@
 Name:           linuxpods
 Version:        1.0.2
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        AirPods control daemon and KDE Plasma 6 widget
 
-License:        GPL-3.0-or-later
+License:        GPL-3.0-or-later AND MIT
 URL:            https://github.com/Explor3Universe/LinuxPods
 Source0:        %{url}/archive/v%{version}/%{name}-%{version}.tar.gz
 Source1:        %{name}.rpmlintrc
@@ -13,6 +13,7 @@ BuildRequires:  gcc-c++
 BuildRequires:  cmake(Qt6Core)
 BuildRequires:  cmake(Qt6Bluetooth)
 BuildRequires:  cmake(Qt6DBus)
+BuildRequires:  cmake(Qt6Network)
 BuildRequires:  pkgconfig(openssl)
 BuildRequires:  pkgconfig(libpulse)
 BuildRequires:  systemd-rpm-macros
@@ -47,7 +48,7 @@ Features:
 %package        plasmoid
 Summary:        KDE Plasma 6 system tray widget for LinuxPods
 BuildArch:      noarch
-Requires:       %{name}%{?_isa} = %{version}-%{release}
+Requires:       %{name} = %{version}-%{release}
 Requires:       plasma-workspace
 
 %description    plasmoid
@@ -105,6 +106,12 @@ test -x %{buildroot}%{_bindir}/linuxpods
 %{_datadir}/plasma/plasmoids/io.github.Explor3Universe.LinuxPods/
 
 %changelog
+* Thu Apr 16 2026 Nikita Sizikov <nixs.code@gmail.com> - 1.0.2-3
+- License tag: GPL-3.0-or-later AND MIT (bundled qr-code-generator is MIT)
+- Plasmoid subpackage: drop %%{?_isa} from Requires (noarch can't depend
+  on arch-specific, breaks multiarch installability)
+- Add missing BuildRequires: cmake(Qt6Network) for QLocalSocket in CLI
+
 * Thu Apr 16 2026 Nikita Sizikov <nixs.code@gmail.com> - 1.0.2-2
 - Address Fedora reviewer feedback (rhbz#2456922, comment 20):
   - Source0 URL switched to canonical git-tag format per SourceURL
