@@ -156,7 +156,11 @@ ColumnLayout {
                     }
 
                     onCurrentIndexChanged: {
-                        if (!updating && fullRep.b)
+                        // `updating` alone isn't enough: PC3.TabBar can emit this
+                        // asynchronously, after onNoiseModeChanged cleared the flag.
+                        // Also require a real change, or a backend sync re-sends the
+                        // command in a loop that pins plasmashell at ~100% CPU.
+                        if (!updating && fullRep.b && currentIndex !== fullRep.b.noiseMode)
                             fullRep.b.setNoise(currentIndex);
                     }
 
