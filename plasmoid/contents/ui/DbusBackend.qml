@@ -86,23 +86,29 @@ Item {
         cmdDs.connectSource(cmd);
     }
 
+    readonly property string _pollCmd: "gdbus call --session"
+        + " -d io.github.Explor3Universe.LinuxPods"
+        + " -o /io/github/Explor3Universe/LinuxPods"
+        + " -m org.freedesktop.DBus.Properties.GetAll"
+        + " io.github.Explor3Universe.LinuxPods.Manager"
+
+    // Reads the values once, right away. We call this just after sending a
+    // command so the display updates immediately instead of waiting for the
+    // next regular refresh. The normal every-2-seconds refreshing is handled
+    // by pollDs below.
     function _poll() {
         _seq++;
-        let cmd = "gdbus call --session"
-            + " -d io.github.Explor3Universe.LinuxPods"
-            + " -o /io/github/Explor3Universe/LinuxPods"
-            + " -m org.freedesktop.DBus.Properties.GetAll"
-            + " io.github.Explor3Universe.LinuxPods.Manager"
-            + " #" + _seq;
-        pollDs.connectSource(cmd);
+        pollDs.connectSource(_pollCmd + " #" + _seq);
     }
 
     P5Support.DataSource {
         id: pollDs
         engine: "executable"
-        connectedSources: []
+        interval: 2000                           // re-run the command every 2 seconds
+        connectedSources: [backend._pollCmd]     // always the same command, so it's set up once and just refreshed each time
         onNewData: function(src, data) {
-            disconnectSource(src);
+            // Leave the regular refresh running; only clean up the one-off refreshes from _poll().
+            if (src !== backend._pollCmd) disconnectSource(src);
             let out = data["stdout"] || "";
             let code = data["exit code"];
             if (code !== undefined && code !== 0) {
@@ -152,11 +158,4 @@ Item {
         return r;
     }
 
-    Timer {
-        interval: 2000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: backend._poll()
-    }
 }
