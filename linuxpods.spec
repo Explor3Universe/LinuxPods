@@ -1,12 +1,14 @@
 Name:           linuxpods
 Version:        1.0.2
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        AirPods control daemon and KDE Plasma 6 widget
 
-License:        GPL-3.0-or-later AND MIT
+License:        GPL-3.0-or-later
 URL:            https://github.com/Explor3Universe/LinuxPods
 Source0:        %{url}/archive/v%{version}/%{name}-%{version}.tar.gz
 Source1:        %{name}.rpmlintrc
+# Don't link the GUI-only MIT QR-Code-generator into the headless daemon.
+Patch0:         linuxpods-no-qr-in-daemon.patch
 
 BuildRequires:  cmake >= 3.16
 BuildRequires:  gcc-c++
@@ -20,11 +22,6 @@ BuildRequires:  systemd-rpm-macros
 
 Requires:       bluez
 Requires:       dbus-common
-
-# Bundled third-party library (MIT licensed, upstream at
-# https://www.nayuki.io/page/qr-code-generator-library). Kept vendored
-# because Fedora does not currently package this project.
-Provides:       bundled(qr-code-generator) = 1.8
 
 %description
 LinuxPods is a native Linux backend for Apple AirPods that exposes
@@ -58,7 +55,14 @@ control, feature toggles, and settings. Communicates with
 linuxpods-daemon over D-Bus.
 
 %prep
-%autosetup -n LinuxPods-%{version}
+%autosetup -n LinuxPods-%{version} -p1
+# Fedora does not ship the standalone Qt GUI (-DLINUXPODS_BUILD_GUI=OFF).
+# Drop files that are unused in this build and that complicate licensing:
+# Apple product photos (GUI assets), the vendored MIT QR library (GUI-only),
+# and unlicensed design mockups.
+rm -f src/assets/*.png
+rm -rf src/thirdparty
+rm -rf design
 
 %conf
 pushd src
@@ -106,6 +110,12 @@ test -x %{buildroot}%{_bindir}/linuxpods
 %{_datadir}/plasma/plasmoids/io.github.Explor3Universe.LinuxPods/
 
 %changelog
+* Wed Sep 16 2026 Nikita Sizikov <nixs.code@gmail.com> - 1.0.2-4
+- Do not ship the standalone Qt GUI (rhbz#2456922, comment 38)
+- Stop linking vendored QR-Code-generator into the daemon (GUI-only)
+- Drop Apple product images, unused QR sources and design mockups in %%prep
+- License: GPL-3.0-or-later
+
 * Thu Apr 16 2026 Nikita Sizikov <nixs.code@gmail.com> - 1.0.2-3
 - License tag: GPL-3.0-or-later AND MIT (bundled qr-code-generator is MIT)
 - Plasmoid subpackage: drop %%{?_isa} from Requires (noarch can't depend

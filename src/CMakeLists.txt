@@ -18,11 +18,12 @@ set(QT_DISABLE_RPATH ON)
 # pass -DLINUXPODS_BUILD_GUI=OFF.
 option(LINUXPODS_BUILD_GUI "Build standalone Qt6 GUI front-end" ON)
 
+# Network is required by the CLI (QLocalSocket). Core/Bluetooth/DBus are
+# required by the daemon. Extra Qt modules are pulled in only for the GUI.
+find_package(Qt6 REQUIRED COMPONENTS Core Bluetooth DBus Network)
 if(LINUXPODS_BUILD_GUI)
-    find_package(Qt6 REQUIRED COMPONENTS Quick Widgets Bluetooth DBus LinguistTools)
+    find_package(Qt6 REQUIRED COMPONENTS Quick Widgets LinguistTools)
     find_package(KF6StatusNotifierItem REQUIRED)
-else()
-    find_package(Qt6 REQUIRED COMPONENTS Core Bluetooth DBus)
 endif()
 find_package(OpenSSL REQUIRED)
 find_package(PkgConfig REQUIRED)
@@ -146,7 +147,9 @@ install(TARGETS linuxpods
 )
 
 # ── Headless daemon (linuxpods-daemon) ───────────────────────────────
-# Shares all backend sources with linuxpods-gui but has no QML/GUI.
+# Shares backend sources with linuxpods-gui but has no QML/GUI.
+# The vendored QR-Code-generator is GUI-only (Magic Cloud Keys dialog)
+# and must not be linked into the daemon.
 set(DAEMON_SOURCES
     daemon/main.cpp
     service/linuxpodsservice.cpp
@@ -168,8 +171,6 @@ set(DAEMON_SOURCES
     ble/bleutils.h
     ble/blemanager.cpp
     ble/blemanager.h
-    thirdparty/QR-Code-generator/qrcodegen.cpp
-    thirdparty/QR-Code-generator/qrcodegen.hpp
     eardetection.hpp
     media/playerstatuswatcher.cpp
     media/playerstatuswatcher.h

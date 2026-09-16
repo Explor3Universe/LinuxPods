@@ -59,10 +59,12 @@ curl -fSL -o "$TOPDIR/SOURCES/$TARBALL" "$GITHUB_URL"
 echo ">>> Tarball:"
 ls -la "$TOPDIR/SOURCES/$TARBALL"
 
-# Source1 — rpmlintrc filter file consumed by rpmlint during review.
-if [[ -f "$SCRIPT_DIR/${NAME}.rpmlintrc" ]]; then
-    cp "$SCRIPT_DIR/${NAME}.rpmlintrc" "$TOPDIR/SOURCES/"
-fi
+# Extra sources/patches consumed by the spec (rpmlintrc, Patch0, ...).
+shopt -s nullglob
+for extra in "$SCRIPT_DIR/${NAME}.rpmlintrc" "$SCRIPT_DIR"/*.patch; do
+    cp -v "$extra" "$TOPDIR/SOURCES/"
+done
+shopt -u nullglob
 
 cp "$SPEC" "$TOPDIR/SPECS/"
 
