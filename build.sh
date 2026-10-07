@@ -1,90 +1,98 @@
 #!/usr/bin/env bash
-# Build LinuxPods RPM from the vendored source tree under ./src/.
-# Usage: ./build.sh [--skip-deps]
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Build Fedora RPMs from the checksum-pinned, repacked upstream release.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SPEC="$SCRIPT_DIR/linuxpods.spec"
-SRC_DIR="$SCRIPT_DIR/src"
-OUTDIR="$SCRIPT_DIR/out"
+OUTDIR="${LINUXPODS_OUTDIR:-$SCRIPT_DIR/out}"
 
 # rpmbuild + cmake misbehave when paths contain spaces. Build in a
 # space-free temp dir, then copy artifacts back to OUTDIR.
-TOPDIR="${LINUXPODS_BUILD_DIR:-$HOME/.cache/linuxpods-rpmbuild}"
-if [[ "$TOPDIR" == *" "* ]]; then
-    echo "ERROR: TOPDIR contains spaces ($TOPDIR). Set LINUXPODS_BUILD_DIR to a space-free path." >&2
+BUILD_BASE="${LINUXPODS_BUILD_DIR:-$HOME/.cache/linuxpods-rpmbuild}"
+if [[ "$BUILD_BASE" == *[[:space:]]* ]]; then
+    echo "ERROR: Set LINUXPODS_BUILD_DIR to a path without whitespace." >&2
     exit 1
 fi
 
 SKIP_DEPS=0
-for arg in "$@"; do
-    case "$arg" in
+MODE=-ba
+SOURCE_ARGS=()
+while [[ $# -gt 0 ]]; do
+    case "$1" in
         --skip-deps) SKIP_DEPS=1 ;;
+        --srpm-only) MODE=-bs; SKIP_DEPS=1 ;;
+        --source-archive)
+            [[ $# -ge 2 ]] || { echo "ERROR: --source-archive needs a path" >&2; exit 2; }
+            SOURCE_ARGS=(--upstream-archive "$2")
+            shift
+            ;;
         -h|--help)
-            echo "Usage: $0 [--skip-deps]"
+            echo "Usage: $0 [--skip-deps] [--srpm-only] [--source-archive FILE]"
             echo "  --skip-deps   Skip 'sudo dnf builddep' step (use if BuildRequires are already installed)"
+            echo "  --srpm-only   Create only the source RPM (requires rpm-build and python3)"
+            echo "  --source-archive FILE   Repack a local upstream archive instead of downloading it"
             exit 0
             ;;
+        *) echo "ERROR: Unknown option: $1" >&2; exit 2 ;;
     esac
+    shift
 done
 
 if [[ ! -f "$SPEC" ]]; then
     echo "ERROR: $SPEC not found" >&2
     exit 1
 fi
-if [[ ! -d "$SRC_DIR" ]]; then
-    echo "ERROR: $SRC_DIR not found — vendored sources missing" >&2
+for tool in rpmbuild rpmspec python3; do
+    command -v "$tool" >/dev/null || { echo "ERROR: $tool is required" >&2; exit 1; }
+done
+
+NAME=$(rpmspec -q --srpm --queryformat '%{NAME}' "$SPEC")
+VERSION=$(rpmspec -q --srpm --queryformat '%{VERSION}' "$SPEC")
+TARBALL="${NAME}-${VERSION}-fedora.tar.gz"
+
+mkdir -p "$BUILD_BASE"
+BUILD_BASE=$(cd "$BUILD_BASE" && pwd -P)
+if [[ "$BUILD_BASE" == *[[:space:]]* ]]; then
+    echo "ERROR: LINUXPODS_BUILD_DIR resolves to a path containing whitespace." >&2
     exit 1
 fi
-
-# Read Name and Version from the spec.
-NAME=$(awk '/^Name:/    {print $2; exit}' "$SPEC")
-VERSION=$(awk '/^Version:/ {print $2; exit}' "$SPEC")
-TARBALL="${NAME}-${VERSION}.tar.gz"
-# Inner directory name — mirrors the GitHub release archive layout
-# (%{URL}/archive/refs/tags/v${VERSION}.tar.gz expands to LinuxPods-${VERSION}/)
-# so the spec's %autosetup and %build steps are identical whether the
-# source is produced locally or fetched from a tagged upstream release.
-TARBALL_DIR="LinuxPods-${VERSION}"
-
+TOPDIR=$(mktemp -d "$BUILD_BASE/build.XXXXXX")
 echo ">>> Preparing rpmbuild tree at $TOPDIR"
-rm -rf "$TOPDIR"
 mkdir -p "$TOPDIR"/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
 mkdir -p "$OUTDIR"
 
-GITHUB_URL="https://github.com/Explor3Universe/LinuxPods/archive/refs/tags/v${VERSION}.tar.gz"
-echo ">>> Downloading source tarball from $GITHUB_URL"
-curl -fSL -o "$TOPDIR/SOURCES/$TARBALL" "$GITHUB_URL"
+python3 "$SCRIPT_DIR/linuxpods-prepare-source.py" "$VERSION" \
+    "${SOURCE_ARGS[@]}" --output-dir "$TOPDIR/SOURCES"
 
-echo ">>> Tarball:"
-ls -la "$TOPDIR/SOURCES/$TARBALL"
+# Copy exactly the additional sources and patches declared by the spec.
+rpmspec --parse "$SPEC" > "$TOPDIR/expanded.spec"
+while read -r source; do
+    file=${source##*/}
+    [[ "$file" == "$TARBALL" ]] && continue
+    cp -pv "$SCRIPT_DIR/$file" "$TOPDIR/SOURCES/"
+done < <(awk '/^(Source[0-9]*|Patch[0-9]*):/ {print $2}' "$TOPDIR/expanded.spec")
 
-# Extra sources/patches consumed by the spec (rpmlintrc, Patch0, ...).
-shopt -s nullglob
-for extra in "$SCRIPT_DIR/${NAME}.rpmlintrc" "$SCRIPT_DIR"/*.patch; do
-    cp -v "$extra" "$TOPDIR/SOURCES/"
-done
-shopt -u nullglob
-
-cp "$SPEC" "$TOPDIR/SPECS/"
+cp -p "$SPEC" "$TOPDIR/SPECS/"
 
 if [[ $SKIP_DEPS -eq 0 ]]; then
     echo ">>> Installing build dependencies (sudo dnf builddep)"
-    sudo dnf builddep -y "$SPEC"
+    if [[ $EUID -eq 0 ]]; then
+        dnf builddep -y "$SPEC"
+    else
+        sudo dnf builddep -y "$SPEC"
+    fi
 else
     echo ">>> Skipping dnf builddep (--skip-deps)"
 fi
 
 echo ">>> Running rpmbuild"
-rpmbuild --define "_topdir $TOPDIR" -ba "$TOPDIR/SPECS/$(basename "$SPEC")"
+rpmbuild --define "_topdir $TOPDIR" "$MODE" "$TOPDIR/SPECS/$(basename "$SPEC")"
 
 echo ">>> Collecting artifacts to $OUTDIR"
-rm -f "$OUTDIR"/*.rpm
-find "$TOPDIR/RPMS" -name '*.rpm' -exec cp -v {} "$OUTDIR/" \;
-find "$TOPDIR/SRPMS" -name '*.rpm' -exec cp -v {} "$OUTDIR/" \;
+find "$TOPDIR/RPMS" "$TOPDIR/SRPMS" -name '*.rpm' -exec cp -pv {} "$OUTDIR/" \;
+cp -p "$TOPDIR/SOURCES/$TARBALL" "$OUTDIR/"
 
 echo ""
-echo "Done. Built RPMs:"
-ls -1 "$OUTDIR"/*.rpm
-echo ""
-echo "Install with:  sudo dnf install $OUTDIR/${NAME}-${VERSION}-*.x86_64.rpm"
+echo "Done. Artifacts: $OUTDIR"
+echo "Build tree: $TOPDIR"

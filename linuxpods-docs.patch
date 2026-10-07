@@ -1,0 +1,205 @@
+SPDX-License-Identifier: GPL-3.0-or-later
+Subject: Document the packaged CLI and headless Fedora build accurately
+Related: https://bugzilla.redhat.com/show_bug.cgi?id=2456922
+
+diff --git a/README.md b/README.md
+index a4935f9..b282711 100644
+--- a/README.md
++++ b/README.md
+@@ -5,6 +5,7 @@
+ Native AirPods integration for Linux. Battery monitoring, noise control, ear detection, and more — as a native KDE Plasma 6 system tray widget.
+ 
+ Built on the reverse-engineered Apple Accessory Protocol (AAP) over L2CAP.
++The backend derives from [LibrePods](https://github.com/kavishdevar/librepods).
+ 
+ ## Features
+ 
+@@ -35,14 +36,17 @@ The daemon manages AirPods connections and exposes state over D-Bus. The Plasma
+ 
+ ## Installation
+ 
+-### From RPM (Fedora)
++### From Copr (Fedora)
+ 
+ ```bash
+-sudo dnf install ./linuxpods-1.0.2-1.fc43.x86_64.rpm ./linuxpods-plasmoid-1.0.2-1.fc43.x86_64.rpm
++sudo dnf copr enable explor3universe/linuxpods
++sudo dnf install linuxpods linuxpods-plasmoid
+ systemctl --user enable --now linuxpods-daemon
+ ```
+ 
+ The plasmoid appears in the system tray automatically when AirPods connect.
++Pair the AirPods in the desktop Bluetooth settings first. LinuxPods manages
++already-connected devices; it does not perform Bluetooth pairing.
+ 
+ ### Build from source
+ 
+@@ -53,20 +57,32 @@ cd LinuxPods
+ # RPM build
+ ./build.sh                # installs build dependencies via dnf
+ ./build.sh --skip-deps    # if deps already installed
+-sudo dnf install out/linuxpods-1.0.2-*.rpm out/linuxpods-plasmoid-1.0.2-*.rpm
++./build.sh --srpm-only    # source RPM only
+ 
+ # Or local build without RPM
+-cmake -S src -B build
++cmake -S src -B build -DLINUXPODS_BUILD_GUI=OFF
+ cmake --build build -j$(nproc)
+ ./build/linuxpods-daemon
+ ```
+ 
++For a local installation, pass the two matching binary RPMs from `out/`
++(`linuxpods` for your architecture and `linuxpods-plasmoid.noarch`) to
++`sudo dnf install`. Source and debug RPMs are not needed for normal use.
++
++The RPM build prepares a checksum-pinned, filtered upstream archive. See
++`linuxpods-source-notes.md`, also shipped as package documentation, for
++the exact exclusions and offline source-preparation command.
++
+ ### Build dependencies
+ 
+ - cmake >= 3.16, gcc-c++
+-- qt6-qtbase-devel, qt6-qtconnectivity-devel, qt6-qtdeclarative-devel, qt6-qttools-devel
+-- kf6-kstatusnotifieritem-devel
++- qt6-qtbase-devel, qt6-qtconnectivity-devel
+ - openssl-devel, pulseaudio-libs-devel
++- RPM builds also use rpm-build, systemd-rpm-macros, python3, dbus-daemon and glib2
++
++The standalone Qt GUI is deprecated and excluded from Fedora's source
++archive and binary packages. The supported Fedora interface is the Plasma
++widget, which uses Plasma 6, plasma5support and the `gdbus` command.
+ 
+ ## Usage
+ 
+@@ -85,8 +101,15 @@ linuxpods noise:anc           # Active Noise Cancellation
+ linuxpods noise:transparency  # Transparency mode
+ linuxpods noise:adaptive      # Adaptive mode
+ linuxpods noise:off           # Off
++linuxpods ca:on               # Enable Conversational Awareness
++linuxpods ca:off              # Disable Conversational Awareness
++linuxpods --help
+ ```
+ 
++The v1.0.2 CLI uses a one-way local socket. A zero exit status does not
++confirm that AirPods are connected or that a command was applied. Use the
++widget or D-Bus properties to check device state.
++
+ ### D-Bus
+ 
+ ```bash
+@@ -133,4 +156,3 @@ The RPM spec produces two packages:
+ |---------|----------|
+ | `linuxpods` | Daemon, CLI, D-Bus service, systemd unit |
+ | `linuxpods-plasmoid` | KDE Plasma 6 system tray widget |
+-
+diff --git a/data/man/linuxpods-daemon.1 b/data/man/linuxpods-daemon.1
+index e289479..5d7ae67 100644
+--- a/data/man/linuxpods-daemon.1
++++ b/data/man/linuxpods-daemon.1
+@@ -11,17 +11,19 @@ is a headless background service that manages Apple AirPods on Linux
+ through the reverse-engineered Apple Accessory Protocol (AAP) over
+ Bluetooth L2CAP. It handles device discovery, connection,
+ battery reporting, noise-control mode switching, ear detection, media
+-integration (PulseAudio and MPRIS), and the BLE proximity advertising
+-used by AirPods for pairing.
++integration (PulseAudio and MPRIS), and BLE proximity advertisements.
++Pair the AirPods through the desktop Bluetooth settings or
++.BR bluetoothctl (1)
++before using LinuxPods. The daemon does not perform Bluetooth pairing.
+ .PP
+ The daemon exposes a session D-Bus interface at
+ .I io.github.Explor3Universe.LinuxPods
+ on the
+ .I /io/github/Explor3Universe/LinuxPods
+ object path, used by front-ends such as the LinuxPods Plasma 6 tray
+-widget and the
++widget. The
+ .BR linuxpods (1)
+-command-line tool.
++command-line tool uses a separate per-user local socket.
+ .PP
+ It is intended to be started automatically by the user systemd instance
+ via
+@@ -32,9 +34,6 @@ directly.
+ .TP
+ .B \-\-debug
+ Enable verbose debug logging to standard error.
+-.TP
+-.B \-h , \-\-help
+-Print a short help message and exit.
+ .SH FILES
+ .TP
+ .I ~/.config/AirPodsTrayApp/AirPodsTrayApp.conf
+diff --git a/data/man/linuxpods.1 b/data/man/linuxpods.1
+index 6283177..8b4522a 100644
+--- a/data/man/linuxpods.1
++++ b/data/man/linuxpods.1
+@@ -5,7 +5,8 @@ linuxpods \- command-line control tool for LinuxPods
+ .SH SYNOPSIS
+ .B linuxpods
+ .I COMMAND
+-.RI [ ARGS... ]
++.br
++.B linuxpods \-h\fR|\fB\-\-help
+ .SH DESCRIPTION
+ .B linuxpods
+ is a small command-line client that talks to a running
+@@ -16,33 +17,38 @@ where the Plasma 6 widget is not available.
+ All commands operate on the currently-connected AirPods device.
+ .SH COMMANDS
+ .TP
+-.B status
+-Print the current device name, battery levels (left earbud, right
+-earbud, case), noise-control mode, and ear-detection state.
++.B noise:off
++Disable noise control.
+ .TP
+-.B noise \fIMODE\fR
+-Set the noise-control mode. \fIMODE\fR must be one of
+-.BR off ,
+-.BR anc ,
+-.BR transparency ,
+-or
+-.BR adaptive .
++.B noise:anc
++Enable Active Noise Cancellation.
+ .TP
+-.B ca \fBon\fR|\fBoff\fR
+-Enable or disable Conversational Awareness.
++.B noise:transparency
++Enable Transparency mode.
+ .TP
+-.B battery
+-Print battery levels as machine-readable \fIkey=value\fR lines.
++.B noise:adaptive
++Enable Adaptive mode on supported devices.
+ .TP
+-.B connect
+-Attempt to (re)connect to the last-known device.
++.B ca:on
++Enable Conversational Awareness.
+ .TP
+-.B disconnect
+-Disconnect from the current device.
++.B ca:off
++Disable Conversational Awareness.
++.SH OPTIONS
++.TP
++.B \-h , \-\-help
++Print usage and available commands, then exit.
+ .SH EXIT STATUS
+ .B linuxpods
+-exits with status 0 on success and non-zero on failure (no device, D-Bus
+-error, invalid argument).
++exits with status 1 when invoked without arguments or when it cannot
++connect to the daemon, and status 0 after displaying help or submitting
++a command. The socket protocol is one-way: a zero status does not confirm
++that AirPods are connected, that the command was recognized, or that the
++requested setting was applied.
++.SH FILES
++.TP
++.I $XDG_RUNTIME_DIR/linuxpods-daemon
++Per-user command socket created by the daemon.
+ .SH SEE ALSO
+ .BR linuxpods-daemon (1),
+ .BR busctl (1)

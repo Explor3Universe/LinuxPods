@@ -11,17 +11,19 @@ is a headless background service that manages Apple AirPods on Linux
 through the reverse-engineered Apple Accessory Protocol (AAP) over
 Bluetooth L2CAP. It handles device discovery, connection,
 battery reporting, noise-control mode switching, ear detection, media
-integration (PulseAudio and MPRIS), and the BLE proximity advertising
-used by AirPods for pairing.
+integration (PulseAudio and MPRIS), and BLE proximity advertisements.
+Pair the AirPods through the desktop Bluetooth settings or
+.BR bluetoothctl (1)
+before using LinuxPods. The daemon does not perform Bluetooth pairing.
 .PP
 The daemon exposes a session D-Bus interface at
 .I io.github.Explor3Universe.LinuxPods
 on the
 .I /io/github/Explor3Universe/LinuxPods
 object path, used by front-ends such as the LinuxPods Plasma 6 tray
-widget and the
+widget. The
 .BR linuxpods (1)
-command-line tool.
+command-line tool uses a separate per-user local socket.
 .PP
 It is intended to be started automatically by the user systemd instance
 via
@@ -32,9 +34,6 @@ directly.
 .TP
 .B \-\-debug
 Enable verbose debug logging to standard error.
-.TP
-.B \-h , \-\-help
-Print a short help message and exit.
 .SH FILES
 .TP
 .I ~/.config/AirPodsTrayApp/AirPodsTrayApp.conf

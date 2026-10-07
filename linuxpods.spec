@@ -1,14 +1,22 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 Name:           linuxpods
 Version:        1.0.2
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        AirPods control daemon and KDE Plasma 6 widget
 
 License:        GPL-3.0-or-later
 URL:            https://github.com/Explor3Universe/LinuxPods
-Source0:        %{url}/archive/v%{version}/%{name}-%{version}.tar.gz
-Source1:        %{name}.rpmlintrc
+# Reproduce from the checksum-pinned upstream tag with:
+# python3 linuxpods-prepare-source.py 1.0.2
+# See linuxpods-source-notes.md for the complete exclusion list.
+Source0:        %{url}/releases/download/v%{version}/%{name}-%{version}-fedora.tar.gz
+Source1:        %{name}-prepare-source.py
+Source2:        %{name}-source-notes.md
+Source3:        %{name}-smoke-test.py
 # Don't link the GUI-only MIT QR-Code-generator into the headless daemon.
 Patch0:         linuxpods-no-qr-in-daemon.patch
+Patch1:         linuxpods-docs.patch
 
 BuildRequires:  cmake >= 3.16
 BuildRequires:  gcc-c++
@@ -19,6 +27,9 @@ BuildRequires:  cmake(Qt6Network)
 BuildRequires:  pkgconfig(openssl)
 BuildRequires:  pkgconfig(libpulse)
 BuildRequires:  systemd-rpm-macros
+BuildRequires:  python3
+BuildRequires:  dbus-daemon
+BuildRequires:  glib2
 
 Requires:       bluez
 Requires:       dbus-common
@@ -29,10 +40,10 @@ battery, noise control, ear detection and related features through a
 session D-Bus interface, using the reverse-engineered Apple Accessory
 Protocol (AAP) over Bluetooth L2CAP.
 
-This package ships the headless daemon (linuxpods-daemon), its systemd
-user unit, the D-Bus session activation file, and the linuxpods
-command-line client. Install the linuxpods-plasmoid sub-package for the
-native KDE Plasma 6 system tray widget.
+This package ships the headless daemon (linuxpods-daemon), its user
+service, the D-Bus session activation file, and the linuxpods
+command-line client. Install the companion KDE Plasma 6 widget package
+for the native system tray interface.
 
 Features:
   * Battery status (left earbud, right earbud, case, headset)
@@ -45,8 +56,11 @@ Features:
 %package        plasmoid
 Summary:        KDE Plasma 6 system tray widget for LinuxPods
 BuildArch:      noarch
+# A noarch widget must not require the build machine's architecture.
 Requires:       %{name} = %{version}-%{release}
 Requires:       plasma-workspace
+Requires:       plasma5support
+Requires:       /usr/bin/gdbus
 
 %description    plasmoid
 Native KDE Plasma 6 system tray widget for LinuxPods. Provides a
@@ -56,13 +70,7 @@ linuxpods-daemon over D-Bus.
 
 %prep
 %autosetup -n LinuxPods-%{version} -p1
-# Fedora does not ship the standalone Qt GUI (-DLINUXPODS_BUILD_GUI=OFF).
-# Drop files that are unused in this build and that complicate licensing:
-# Apple product photos (GUI assets), the vendored MIT QR library (GUI-only),
-# and unlicensed design mockups.
-rm -f src/assets/*.png
-rm -rf src/thirdparty
-rm -rf design
+cp -p %{SOURCE2} .
 
 %conf
 pushd src
@@ -82,8 +90,7 @@ install -Dpm 0644 data/man/linuxpods-daemon.1 %{buildroot}%{_mandir}/man1/linuxp
 install -Dpm 0644 data/man/linuxpods.1        %{buildroot}%{_mandir}/man1/linuxpods.1
 
 %check
-test -x %{buildroot}%{_bindir}/linuxpods-daemon
-test -x %{buildroot}%{_bindir}/linuxpods
+dbus-run-session -- %{__python3} %{SOURCE3} %{buildroot}%{_bindir}
 
 %post
 %systemd_user_post linuxpods-daemon.service
@@ -96,7 +103,7 @@ test -x %{buildroot}%{_bindir}/linuxpods
 
 %files
 %license LICENSE
-%doc README.md
+%doc README.md linuxpods-source-notes.md
 %{_bindir}/linuxpods-daemon
 %{_bindir}/linuxpods
 %{_mandir}/man1/linuxpods-daemon.1*
@@ -106,10 +113,17 @@ test -x %{buildroot}%{_bindir}/linuxpods
 
 %files plasmoid
 %license LICENSE
-%doc README.md
+%doc README.md linuxpods-source-notes.md
 %{_datadir}/plasma/plasmoids/io.github.Explor3Universe.LinuxPods/
 
 %changelog
+* Wed Oct 07 2026 Nikita Sizikov <nixs.code@gmail.com> - 1.0.2-5
+- Prepare reproducible Fedora sources before SRPM creation (rhbz#2456922)
+- Include the checksum-pinned repacking script and source/license notes
+- Keep the noarch widget dependency fully versioned without an ISA qualifier
+- Require the widget's D-Bus client and Plasma compatibility module
+- Correct command-line documentation and exercise the daemon on a private bus
+
 * Wed Sep 16 2026 Nikita Sizikov <nixs.code@gmail.com> - 1.0.2-4
 - Do not ship the standalone Qt GUI (rhbz#2456922, comment 38)
 - Stop linking vendored QR-Code-generator into the daemon (GUI-only)

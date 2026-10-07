@@ -5,6 +5,7 @@
 Native AirPods integration for Linux. Battery monitoring, noise control, ear detection, and more — as a native KDE Plasma 6 system tray widget.
 
 Built on the reverse-engineered Apple Accessory Protocol (AAP) over L2CAP.
+The backend derives from [LibrePods](https://github.com/kavishdevar/librepods).
 
 ## Features
 
@@ -35,14 +36,17 @@ The daemon manages AirPods connections and exposes state over D-Bus. The Plasma 
 
 ## Installation
 
-### From RPM (Fedora)
+### From Copr (Fedora)
 
 ```bash
-sudo dnf install ./linuxpods-1.0.2-1.fc43.x86_64.rpm ./linuxpods-plasmoid-1.0.2-1.fc43.x86_64.rpm
+sudo dnf copr enable explor3universe/linuxpods
+sudo dnf install linuxpods linuxpods-plasmoid
 systemctl --user enable --now linuxpods-daemon
 ```
 
 The plasmoid appears in the system tray automatically when AirPods connect.
+Pair the AirPods in the desktop Bluetooth settings first. LinuxPods manages
+already-connected devices; it does not perform Bluetooth pairing.
 
 ### Build from source
 
@@ -53,20 +57,32 @@ cd LinuxPods
 # RPM build
 ./build.sh                # installs build dependencies via dnf
 ./build.sh --skip-deps    # if deps already installed
-sudo dnf install out/linuxpods-1.0.2-*.rpm out/linuxpods-plasmoid-1.0.2-*.rpm
+./build.sh --srpm-only    # source RPM only
 
 # Or local build without RPM
-cmake -S src -B build
+cmake -S src -B build -DLINUXPODS_BUILD_GUI=OFF
 cmake --build build -j$(nproc)
 ./build/linuxpods-daemon
 ```
 
+For a local installation, pass the two matching binary RPMs from `out/`
+(`linuxpods` for your architecture and `linuxpods-plasmoid.noarch`) to
+`sudo dnf install`. Source and debug RPMs are not needed for normal use.
+
+The RPM build prepares a checksum-pinned, filtered upstream archive. See
+`linuxpods-source-notes.md`, also shipped as package documentation, for
+the exact exclusions and offline source-preparation command.
+
 ### Build dependencies
 
 - cmake >= 3.16, gcc-c++
-- qt6-qtbase-devel, qt6-qtconnectivity-devel, qt6-qtdeclarative-devel, qt6-qttools-devel
-- kf6-kstatusnotifieritem-devel
+- qt6-qtbase-devel, qt6-qtconnectivity-devel
 - openssl-devel, pulseaudio-libs-devel
+- RPM builds also use rpm-build, systemd-rpm-macros, python3, dbus-daemon and glib2
+
+The standalone Qt GUI is deprecated and excluded from Fedora's source
+archive and binary packages. The supported Fedora interface is the Plasma
+widget, which uses Plasma 6, plasma5support and the `gdbus` command.
 
 ## Usage
 
@@ -85,7 +101,14 @@ linuxpods noise:anc           # Active Noise Cancellation
 linuxpods noise:transparency  # Transparency mode
 linuxpods noise:adaptive      # Adaptive mode
 linuxpods noise:off           # Off
+linuxpods ca:on               # Enable Conversational Awareness
+linuxpods ca:off              # Disable Conversational Awareness
+linuxpods --help
 ```
+
+The v1.0.2 CLI uses a one-way local socket. A zero exit status does not
+confirm that AirPods are connected or that a command was applied. Use the
+widget or D-Bus properties to check device state.
 
 ### D-Bus
 
@@ -133,4 +156,3 @@ The RPM spec produces two packages:
 |---------|----------|
 | `linuxpods` | Daemon, CLI, D-Bus service, systemd unit |
 | `linuxpods-plasmoid` | KDE Plasma 6 system tray widget |
-

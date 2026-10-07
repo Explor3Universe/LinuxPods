@@ -5,7 +5,8 @@ linuxpods \- command-line control tool for LinuxPods
 .SH SYNOPSIS
 .B linuxpods
 .I COMMAND
-.RI [ ARGS... ]
+.br
+.B linuxpods \-h\fR|\fB\-\-help
 .SH DESCRIPTION
 .B linuxpods
 is a small command-line client that talks to a running
@@ -16,33 +17,38 @@ where the Plasma 6 widget is not available.
 All commands operate on the currently-connected AirPods device.
 .SH COMMANDS
 .TP
-.B status
-Print the current device name, battery levels (left earbud, right
-earbud, case), noise-control mode, and ear-detection state.
+.B noise:off
+Disable noise control.
 .TP
-.B noise \fIMODE\fR
-Set the noise-control mode. \fIMODE\fR must be one of
-.BR off ,
-.BR anc ,
-.BR transparency ,
-or
-.BR adaptive .
+.B noise:anc
+Enable Active Noise Cancellation.
 .TP
-.B ca \fBon\fR|\fBoff\fR
-Enable or disable Conversational Awareness.
+.B noise:transparency
+Enable Transparency mode.
 .TP
-.B battery
-Print battery levels as machine-readable \fIkey=value\fR lines.
+.B noise:adaptive
+Enable Adaptive mode on supported devices.
 .TP
-.B connect
-Attempt to (re)connect to the last-known device.
+.B ca:on
+Enable Conversational Awareness.
 .TP
-.B disconnect
-Disconnect from the current device.
+.B ca:off
+Disable Conversational Awareness.
+.SH OPTIONS
+.TP
+.B \-h , \-\-help
+Print usage and available commands, then exit.
 .SH EXIT STATUS
 .B linuxpods
-exits with status 0 on success and non-zero on failure (no device, D-Bus
-error, invalid argument).
+exits with status 1 when invoked without arguments or when it cannot
+connect to the daemon, and status 0 after displaying help or submitting
+a command. The socket protocol is one-way: a zero status does not confirm
+that AirPods are connected, that the command was recognized, or that the
+requested setting was applied.
+.SH FILES
+.TP
+.I $XDG_RUNTIME_DIR/linuxpods-daemon
+Per-user command socket created by the daemon.
 .SH SEE ALSO
 .BR linuxpods-daemon (1),
 .BR busctl (1)
